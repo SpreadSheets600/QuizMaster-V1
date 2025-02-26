@@ -99,24 +99,4 @@ Quiz Master is a multi-user web application designed for exam preparation across
 - Secure authentication (`flask_login`, `flask_security`).
 - Additional quiz modes or question types.
 
-## Setup Instructions
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/your-repo/quiz-master.git
-   cd quiz-master
-   ```
-2. Create a virtual environment and install dependencies:
-   ```bash
-   python -m venv venv
-   source venv/bin/activate
-   pip install -r requirements.txt
-   ```
-3. Run the application:
-   ```bash
-   python app.py
-   ```
-4. Open a browser and navigate to:
-   ```
-   http://127.0.0.1:5000
-   ```
 
