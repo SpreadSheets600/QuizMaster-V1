@@ -34,6 +34,14 @@ Quiz Master is a multi-user web application designed for exam preparation across
   - [ ] Summary charts for performance tracking.
 
 ## Database Schema
+
+<details>
+<summary>Database Schema Image</summary>
+  
+  ![image](.github/DatabaseSchema.png)
+  
+</details>
+
 ### User Table
 - `id` (Primary Key)
 - `username` (Email)
