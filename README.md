@@ -11,7 +11,7 @@ Quiz Master is a multi-user web application designed for exam preparation across
 
 ## Features
 ### Admin (Quiz Master)
-- **Superuser Access:** Preexsisting in database
+- **Superuser Access:** Prexsisting in database
 - **Dashboard Management:**
   - [ ] Create, edit, and delete subjects.
   - [ ] Create, edit, and delete chapters under subjects.
