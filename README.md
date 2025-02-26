@@ -11,27 +11,27 @@ Quiz Master is a multi-user web application designed for exam preparation across
 
 ## Features
 ### Admin (Quiz Master)
-- **Superuser Access:** No registration required, pre-existing in the database.
+- **Superuser Access:** Preexsisting in database
 - **Dashboard Management:**
-  [ ] Create, edit, and delete subjects.
-  [ ] Create, edit, and delete chapters under subjects.
-  [ ] Create quizzes under chapters.
-  [ ] Add multiple-choice questions (MCQs) with one correct option.
-  [ ] Define quiz date and duration.
-  [ ] View and manage registered users.
-  [ ] View quiz performance and generate summary charts.
+  - [ ] Create, edit, and delete subjects.
+  - [ ] Create, edit, and delete chapters under subjects.
+  - [ ] Create quizzes under chapters.
+  - [ ] Add multiple-choice questions (MCQs) with one correct option.
+  - [ ] Define quiz date and duration.
+  - [ ] View and manage registered users.
+  - [ ] View quiz performance and generate summary charts.
 - **Search Functionalities:**
-  [ ] Search users, subjects, and quizzes.
+  - [ ] Search users, subjects, and quizzes.
 
 ### User
 - **Registration & Authentication:**
-  [ ] Users must sign up with an email and password.
-  [ ] Additional fields include full name, qualification, and date of birth.
+  - [ ] Users must sign up with an email and password.
+  - [ ] Additional fields include full name, qualification, and date of birth.
 - **Quiz Management:**
-  [ ] Select subject and chapter for quiz attempts.
-  [ ] Timed quizzes (optional timer feature).
-  [ ] View previous quiz attempts and scores.
-  [ ] Summary charts for performance tracking.
+  - [ ] Select subject and chapter for quiz attempts.
+  - [ ] Timed quizzes (optional timer feature).
+  - [ ] View previous quiz attempts and scores.
+  - [ ] Summary charts for performance tracking.
 
 ## Database Schema
 ### User Table
