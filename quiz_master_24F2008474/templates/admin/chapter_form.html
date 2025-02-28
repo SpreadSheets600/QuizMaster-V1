@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>New/Edit Chapter</title>
+  </head>
+  <body>
+    <h1>
+      {% if chapter %}Edit{% else %}New{% endif %} Chapter for {{ subject.name
+      }}
+    </h1>
+    <form method="POST">
+      <label>Name:</label>
+      <input
+        type="text"
+        name="name"
+        value="{% if chapter %}{{ chapter.name }}{% endif %}"
+        required
+      />
+      <br />
+      <label>Description:</label>
+      <textarea name="description">
+{% if chapter %}{{ chapter.description }}{% endif %}</textarea
+      >
+      <br />
+      <button type="submit">Save</button>
+    </form>
+    <a href="/subjects/{{ subject.id }}/chapters">Back to Chapters</a>
+  </body>
+</html>

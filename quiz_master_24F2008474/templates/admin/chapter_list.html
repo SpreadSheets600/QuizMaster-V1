@@ -1,0 +1,25 @@
+<html>
+  <head>
+    <title>Chapters</title>
+  </head>
+  <body>
+    <h1>Chapters for {{ subject.name }}</h1>
+    <a href="/subjects/{{ subject.id }}/chapters/new">Add New Chapter</a>
+    <ul>
+      {% for chapter in chapters %}
+      <li>
+        {{ chapter.name }} - {{ chapter.description }}
+        <a href="/chapters/{{ chapter.id }}/edit">Edit</a>
+        <form
+          action="/chapters/{{ chapter.id }}/delete"
+          method="POST"
+          style="display: inline"
+        >
+          <button type="submit">Delete</button>
+        </form>
+      </li>
+      {% endfor %}
+    </ul>
+    <a href="/subjects">Back to Subjects</a>
+  </body>
+</html>
