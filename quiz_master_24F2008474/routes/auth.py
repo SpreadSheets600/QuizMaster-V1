@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import login_user, logout_user, login_required
 
 from models.models import User
 from models.database import db
@@ -10,6 +10,11 @@ auth_bp = Blueprint("auth", __name__)
 
 @auth_bp.route("/")
 def index():
+    if current_user.is_authenticated:
+        if current_user.role == "admin":
+            return redirect(url_for("admin.admin_dashboard"))
+        return redirect(url_for("user.user_dashboard"))
+
     return redirect(url_for("auth.login"))
 
 
@@ -19,7 +24,9 @@ def login():
         username = request.form["username"]
         password = request.form["password"]
 
-        user = User.query.filter_by(username=username).first()
+        user = User.query.filter(
+            (User.username == username) | (User.email == username)
+        ).first()
 
         if user and check_password_hash(user.password, password):
             login_user(user)

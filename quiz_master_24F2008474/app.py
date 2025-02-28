@@ -44,9 +44,9 @@ def initialize_db():
     if User.query.count() == 0:
         admin_user = User(
             username="admin",
-            password="admin@123",
-            full_name="Administrator",
+            password=generate_password_hash("admin"),
             email="admin@quizmaster.com",
+            full_name="Administrator",
             role="admin",
         )
         db.session.add(admin_user)
