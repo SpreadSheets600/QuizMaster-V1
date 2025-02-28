@@ -1,0 +1,24 @@
+<html>
+  <head>
+    <title>Subjects</title>
+  </head>
+  <body>
+    <h1>Subjects List</h1>
+    <a href="/admin/subjects/new">Add New Subject</a>
+    <ul>
+      {% for subject in subjects %}
+      <li>
+        {{ subject.name }} - {{ subject.description }}
+        <a href="/admin/subjects/{{ subject.id }}/edit">Edit</a>
+        <form
+          action="/admin/subjects/{{ subject.id }}/delete"
+          method="POST"
+          style="display: inline"
+        >
+          <button type="submit">Delete</button>
+        </form>
+      </li>
+      {% endfor %}
+    </ul>
+  </body>
+</html>
