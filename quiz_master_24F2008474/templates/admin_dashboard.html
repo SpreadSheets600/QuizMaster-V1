@@ -1,19 +1,212 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Admin DashBoard</title>
-  </head>
-  <body>
-    <h2>Hello Admin</h2>
+{% extends "base.html" %} {% block title %}Admin Dashboard | QuizMaster{%
+endblock %} {% set has_sidebar = true %} {% block sidebar %} {% include
+"partials/sidebar.html" %}
+<div class="row g-0">
+	<div class="col-lg-10 py-3 px-3 px-lg-4">
+		{% block content %}
+		<!-- Page Header -->
+		<div class="d-flex justify-content-between align-items-center mb-4">
+			<h4 class="mb-0">Admin Dashboard</h4>
+			<ol class="breadcrumb mb-0">
+				<li class="breadcrumb-item">
+					<a href="#" class="text-decoration-none">Home</a>
+				</li>
+				<li class="breadcrumb-item active">Dashboard</li>
+			</ol>
+		</div>
 
-    <div class="counts">
-      <h3>Counts</h3>
-      <p>Questions : {{question_count}}</p>
-      <p>Chapters : {{chapter_count}}</p>
-      <p>Subjects : {{subject_count}}</p>
-      <p>Quizzes : {{quiz_count}}</p>
-    </div>
-  </body>
-</html>
+		<!-- Stats Row -->
+		<div class="row g-4 mb-4">
+			<div class="col-md-3">
+				<div class="card stat-card h-100">
+					<div class="card-body">
+						<div class="d-flex justify-content-between">
+							<div>
+								<h6 class="text-muted mb-2">Total Users</h6>
+								<h4 class="mb-0">{{ users|length }}</h4>
+							</div>
+							<div class="stat-icon rounded">
+								<i class="bi bi-people-fill fs-4"></i>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="card stat-card h-100">
+					<div class="card-body">
+						<div class="d-flex justify-content-between">
+							<div>
+								<h6 class="text-muted mb-2">Total Subjects</h6>
+								<h4 class="mb-0">{{ subject|length }}</h4>
+							</div>
+							<div class="stat-icon rounded">
+								<i class="bi bi-book-fill fs-4"></i>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="card stat-card h-100">
+					<div class="card-body">
+						<div class="d-flex justify-content-between">
+							<div>
+								<h6 class="text-muted mb-2">Total Quizzes</h6>
+								<h4 class="mb-0">{{ quiz|length }}</h4>
+							</div>
+							<div class="stat-icon rounded">
+								<i class="bi bi-clipboard-check-fill fs-4"></i>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="card stat-card h-100">
+					<div class="card-body">
+						<div class="d-flex justify-content-between">
+							<div>
+								<h6 class="text-muted mb-2">Total Questions</h6>
+								<h4 class="mb-0">{{ question|length }}</h4>
+							</div>
+							<div class="stat-icon rounded">
+								<i class="bi bi-question-circle-fill fs-4"></i>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="row g-4 mb-4">
+			<!-- Recent Subjects -->
+			<div class="col-md-6">
+				<div class="card h-100">
+					<div
+						class="card-header d-flex justify-content-between align-items-center">
+						<h5 class="mb-0">Recent Subjects</h5>
+						<a href="#" class="btn btn-sm btn-outline-primary">Add New</a>
+					</div>
+					<div class="card-body">
+						<div class="table-responsive">
+							<table class="table table-hover">
+								<thead>
+									<tr>
+										<th scope="col">ID</th>
+										<th scope="col">Name</th>
+										<th scope="col">Chapters</th>
+									</tr>
+								</thead>
+								<tbody>
+									{% for sub in subject[:5] %}
+									<tr>
+										<td>{{ sub.id }}</td>
+										<td>{{ sub.name }}</td>
+										<td>{{ sub.chapters|length }}</td>
+									</tr>
+									{% else %}
+									<tr>
+										<td colspan="3" class="text-center">
+											No subjects available
+										</td>
+									</tr>
+									{% endfor %}
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Recent Quizzes -->
+			<div class="col-md-6">
+				<div class="card h-100">
+					<div
+						class="card-header d-flex justify-content-between align-items-center">
+						<h5 class="mb-0">Recent Quizzes</h5>
+						<a href="#" class="btn btn-sm btn-outline-primary">Add New</a>
+					</div>
+					<div class="card-body">
+						<div class="table-responsive">
+							<table class="table table-hover">
+								<thead>
+									<tr>
+										<th scope="col">ID</th>
+										<th scope="col">Name</th>
+										<th scope="col">Date</th>
+										<th scope="col">Questions</th>
+									</tr>
+								</thead>
+								<tbody>
+									{% for q in quiz[:5] %}
+									<tr>
+										<td>{{ q.id }}</td>
+										<td>{{ q.quiz_name }}</td>
+										<td>{{ q.date_of_quiz.strftime('%d %b %Y') }}</td>
+										<td>{{ q.questions|length }}</td>
+									</tr>
+									{% else %}
+									<tr>
+										<td colspan="4" class="text-center">
+											No quizzes available
+										</td>
+									</tr>
+									{% endfor %}
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Recent Users -->
+		<div class="card">
+			<div
+				class="card-header d-flex justify-content-between align-items-center">
+				<h5 class="mb-0">Recent Users</h5>
+				<a href="#" class="btn btn-sm btn-outline-primary">View All</a>
+			</div>
+			<div class="card-body">
+				<div class="table-responsive">
+					<table class="table table-hover">
+						<thead>
+							<tr>
+								<th scope="col">ID</th>
+								<th scope="col">Username</th>
+								<th scope="col">Full Name</th>
+								<th scope="col">Email</th>
+								<th scope="col">Role</th>
+								<th scope="col">Quiz Attempts</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for user in users[:5] %}
+							<tr>
+								<td>{{ user.id }}</td>
+								<td>{{ user.username }}</td>
+								<td>{{ user.full_name }}</td>
+								<td>{{ user.email }}</td>
+								<td>
+									<span
+										class="badge {{ 'bg-danger' if user.role == 'admin' else 'bg-primary' }}">
+										{{ user.role }}
+									</span>
+								</td>
+								<td>{{ user.quiz_attempts|length }}</td>
+							</tr>
+							{% else %}
+							<tr>
+								<td colspan="6" class="text-center">No users available</td>
+							</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+		{% endblock content %}
+	</div>
+</div>
+{% endblock sidebar %}
