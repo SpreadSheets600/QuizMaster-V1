@@ -1,0 +1,251 @@
+<div
+	class="d-flex justify-content-between align-items-center p-3 border-bottom">
+	<h5 class="mb-0 d-none d-lg-block">Admin Menu</h5>
+	<button
+		class="btn btn-sm btn-outline-primary d-lg-none"
+		type="button"
+		data-bs-toggle="offcanvas"
+		data-bs-target="#sidebarMenu"
+		aria-controls="sidebarMenu">
+		<i class="bi bi-list"></i> Menu
+	</button>
+</div>
+
+<!-- Desktop Sidebar (always visible on large screens) -->
+<div class="d-none d-lg-block p-3">
+	<ul class="nav nav-pills flex-column">
+		<li class="nav-item">
+			<a href="{{ url_for('admin.admin_dashboard') }}" class="nav-link active">
+				<i class="bi bi-speedometer2"></i> Dashboard
+			</a>
+		</li>
+		<li class="nav-item">
+			<a
+				href="#subjectsSubmenu"
+				data-bs-toggle="collapse"
+				class="nav-link d-flex justify-content-between align-items-center">
+				<span><i class="bi bi-book"></i> Subjects</span>
+				<i class="bi bi-chevron-down small"></i>
+			</a>
+			<div class="collapse" id="subjectsSubmenu">
+				<ul class="nav nav-pills flex-column ms-3">
+					<li class="nav-item">
+						<a href="#" class="nav-link"><i class="bi bi-dot"></i> View All</a>
+					</li>
+					<li class="nav-item">
+						<a href="#" class="nav-link"><i class="bi bi-dot"></i> Add New</a>
+					</li>
+				</ul>
+			</div>
+		</li>
+		<li class="nav-item">
+			<a
+				href="#chaptersSubmenu"
+				data-bs-toggle="collapse"
+				class="nav-link d-flex justify-content-between align-items-center">
+				<span><i class="bi bi-journal-text"></i> Chapters</span>
+				<i class="bi bi-chevron-down small"></i>
+			</a>
+			<div class="collapse" id="chaptersSubmenu">
+				<ul class="nav nav-pills flex-column ms-3">
+					<li class="nav-item">
+						<a href="#" class="nav-link"><i class="bi bi-dot"></i> View All</a>
+					</li>
+					<li class="nav-item">
+						<a href="#" class="nav-link"><i class="bi bi-dot"></i> Add New</a>
+					</li>
+				</ul>
+			</div>
+		</li>
+		<li class="nav-item">
+			<a
+				href="#quizzesSubmenu"
+				data-bs-toggle="collapse"
+				class="nav-link d-flex justify-content-between align-items-center">
+				<span><i class="bi bi-clipboard-check"></i> Quizzes</span>
+				<i class="bi bi-chevron-down small"></i>
+			</a>
+			<div class="collapse" id="quizzesSubmenu">
+				<ul class="nav nav-pills flex-column ms-3">
+					<li class="nav-item">
+						<a href="#" class="nav-link"><i class="bi bi-dot"></i> View All</a>
+					</li>
+					<li class="nav-item">
+						<a href="#" class="nav-link"><i class="bi bi-dot"></i> Add New</a>
+					</li>
+				</ul>
+			</div>
+		</li>
+		<li class="nav-item">
+			<a
+				href="#questionsSubmenu"
+				data-bs-toggle="collapse"
+				class="nav-link d-flex justify-content-between align-items-center">
+				<span><i class="bi bi-question-circle"></i> Questions</span>
+				<i class="bi bi-chevron-down small"></i>
+			</a>
+			<div class="collapse" id="questionsSubmenu">
+				<ul class="nav nav-pills flex-column ms-3">
+					<li class="nav-item">
+						<a href="#" class="nav-link"><i class="bi bi-dot"></i> View All</a>
+					</li>
+					<li class="nav-item">
+						<a href="#" class="nav-link"><i class="bi bi-dot"></i> Add New</a>
+					</li>
+				</ul>
+			</div>
+		</li>
+		<li class="nav-item">
+			<a
+				href="#usersSubmenu"
+				data-bs-toggle="collapse"
+				class="nav-link d-flex justify-content-between align-items-center">
+				<span><i class="bi bi-people"></i> Users</span>
+				<i class="bi bi-chevron-down small"></i>
+			</a>
+			<div class="collapse" id="usersSubmenu">
+				<ul class="nav nav-pills flex-column ms-3">
+					<li class="nav-item">
+						<a href="#" class="nav-link"><i class="bi bi-dot"></i> View All</a>
+					</li>
+					<li class="nav-item">
+						<a href="#" class="nav-link"><i class="bi bi-dot"></i> Add New</a>
+					</li>
+				</ul>
+			</div>
+		</li>
+	</ul>
+</div>
+
+<!-- Mobile Sidebar (offcanvas component for small screens) -->
+<div
+	class="offcanvas offcanvas-start"
+	tabindex="-1"
+	id="sidebarMenu"
+	aria-labelledby="sidebarMenuLabel">
+	<div class="offcanvas-header">
+		<h5 class="offcanvas-title" id="sidebarMenuLabel">Admin Menu</h5>
+		<button
+			type="button"
+			class="btn-close"
+			data-bs-dismiss="offcanvas"
+			aria-label="Close"></button>
+	</div>
+	<div class="offcanvas-body">
+		<ul class="nav nav-pills flex-column">
+			<li class="nav-item">
+				<a
+					href="{{ url_for('admin.admin_dashboard') }}"
+					class="nav-link active">
+					<i class="bi bi-speedometer2"></i> Dashboard
+				</a>
+			</li>
+			<li class="nav-item">
+				<a
+					href="#mobileSubjectsSubmenu"
+					data-bs-toggle="collapse"
+					class="nav-link d-flex justify-content-between align-items-center">
+					<span><i class="bi bi-book"></i> Subjects</span>
+					<i class="bi bi-chevron-down small"></i>
+				</a>
+				<div class="collapse" id="mobileSubjectsSubmenu">
+					<ul class="nav nav-pills flex-column ms-3">
+						<li class="nav-item">
+							<a href="#" class="nav-link"
+								><i class="bi bi-dot"></i> View All</a
+							>
+						</li>
+						<li class="nav-item">
+							<a href="#" class="nav-link"><i class="bi bi-dot"></i> Add New</a>
+						</li>
+					</ul>
+				</div>
+			</li>
+			<!-- Repeat other menu items for mobile view -->
+			<li class="nav-item">
+				<a
+					href="#mobileChaptersSubmenu"
+					data-bs-toggle="collapse"
+					class="nav-link d-flex justify-content-between align-items-center">
+					<span><i class="bi bi-journal-text"></i> Chapters</span>
+					<i class="bi bi-chevron-down small"></i>
+				</a>
+				<div class="collapse" id="mobileChaptersSubmenu">
+					<ul class="nav nav-pills flex-column ms-3">
+						<li class="nav-item">
+							<a href="#" class="nav-link"
+								><i class="bi bi-dot"></i> View All</a
+							>
+						</li>
+						<li class="nav-item">
+							<a href="#" class="nav-link"><i class="bi bi-dot"></i> Add New</a>
+						</li>
+					</ul>
+				</div>
+			</li>
+			<li class="nav-item">
+				<a
+					href="#mobileQuizzesSubmenu"
+					data-bs-toggle="collapse"
+					class="nav-link d-flex justify-content-between align-items-center">
+					<span><i class="bi bi-clipboard-check"></i> Quizzes</span>
+					<i class="bi bi-chevron-down small"></i>
+				</a>
+				<div class="collapse" id="mobileQuizzesSubmenu">
+					<ul class="nav nav-pills flex-column ms-3">
+						<li class="nav-item">
+							<a href="#" class="nav-link"
+								><i class="bi bi-dot"></i> View All</a
+							>
+						</li>
+						<li class="nav-item">
+							<a href="#" class="nav-link"><i class="bi bi-dot"></i> Add New</a>
+						</li>
+					</ul>
+				</div>
+			</li>
+			<li class="nav-item">
+				<a
+					href="#mobileQuestionsSubmenu"
+					data-bs-toggle="collapse"
+					class="nav-link d-flex justify-content-between align-items-center">
+					<span><i class="bi bi-question-circle"></i> Questions</span>
+					<i class="bi bi-chevron-down small"></i>
+				</a>
+				<div class="collapse" id="mobileQuestionsSubmenu">
+					<ul class="nav nav-pills flex-column ms-3">
+						<li class="nav-item">
+							<a href="#" class="nav-link"
+								><i class="bi bi-dot"></i> View All</a
+							>
+						</li>
+						<li class="nav-item">
+							<a href="#" class="nav-link"><i class="bi bi-dot"></i> Add New</a>
+						</li>
+					</ul>
+				</div>
+			</li>
+			<li class="nav-item">
+				<a
+					href="#mobileUsersSubmenu"
+					data-bs-toggle="collapse"
+					class="nav-link d-flex justify-content-between align-items-center">
+					<span><i class="bi bi-people"></i> Users</span>
+					<i class="bi bi-chevron-down small"></i>
+				</a>
+				<div class="collapse" id="mobileUsersSubmenu">
+					<ul class="nav nav-pills flex-column ms-3">
+						<li class="nav-item">
+							<a href="#" class="nav-link"
+								><i class="bi bi-dot"></i> View All</a
+							>
+						</li>
+						<li class="nav-item">
+							<a href="#" class="nav-link"><i class="bi bi-dot"></i> Add New</a>
+						</li>
+					</ul>
+				</div>
+			</li>
+		</ul>
+	</div>
+</div>
