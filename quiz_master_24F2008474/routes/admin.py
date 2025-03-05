@@ -1,9 +1,11 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
+from werkzeug.utils import secure_filename
 from datetime import datetime
+import os
 
 from models.database import db
-from models.models import Question, Subject, Chapter, Quiz
+from models.models import QuizAttempt, Question, Subject, Chapter, Quiz, User
 
 admin_bp = Blueprint("admin", __name__)
 
@@ -15,17 +17,19 @@ def admin_dashboard():
         flash("Access Denied", "error")
         return redirect(url_for("auth.login"))
 
-    question_count = Question.query.count()
-    subject_count = Subject.query.count()
-    chapter_count = Chapter.query.count()
-    quiz_count = Quiz.query.count()
+    question = Question.query.all()
+    subject = Subject.query.all()
+    chapter = Chapter.query.all()
+    quiz = Quiz.query.all()
+    users = User.query.all()
 
     return render_template(
         "admin_dashboard.html",
-        subject_count=subject_count,
-        chapter_count=chapter_count,
-        question_count=question_count,
-        quiz_count=quiz_count,
+        subject=subject,
+        chapter=chapter,
+        question=question,
+        quiz=quiz,
+        users=users,
     )
 
 
@@ -234,8 +238,12 @@ def quizzes_list():
         return redirect(url_for("auth.login"))
 
     quizzes = Quiz.query.all()
+    subject = Subject.query.all()
+    chapter = Chapter.query.all()
 
-    return render_template("admin/quiz_list.html", quizzes=quizzes)
+    return render_template(
+        "admin/quiz_list.html", quizzes=quizzes, subjects=subject, chapters=chapter
+    )
 
 
 @admin_bp.route("/quizzes/new", methods=["GET", "POST"])
@@ -246,11 +254,16 @@ def quiz_new():
         return redirect(url_for("auth.login"))
 
     if request.method == "POST":
+        name = request.form.get("quiz_name")
         remarks = request.form.get("remarks")
         subject_id = request.form.get("subject_id")
         chapter_id = request.form.get("chapter_id")
         date_of_quiz = request.form.get("date_of_quiz")
         time_duration = request.form.get("time_duration")
+
+        if not name:
+            flash("Please Enter The Quiz Name", "error")
+            return render_template("admin/quiz_form.html")
 
         if not date_of_quiz or not time_duration:
             flash("Date And Time Duration Are Required", "error")
@@ -266,17 +279,357 @@ def quiz_new():
             flash("Time Duration Must Be In HH:MM Format", "error")
             return render_template("admin/quiz_form.html")
 
-        new_quiz = Quiz(subject_id = subject_id, chapter_id = chapter_id, date_of_quiz = date_of_quiz, time_duration = time_duration, remarks = remarks)
-        
+        new_quiz = Quiz(
+            quiz_name=name,
+            subject_id=subject_id,
+            chapter_id=chapter_id,
+            date_of_quiz=date_of_quiz,
+            time_duration=time_duration,
+            remarks=remarks,
+        )
+
         db.session.add(new_quiz)
         db.session.commit()
 
+        flash("Quiz Created Successfully", "success")
+        return redirect(url_for("admin.quizzes_list", quiz_id=new_quiz.id))
+
+    return render_template(
+        "admin/quiz_form.html",
+        subjects=Subject.query.all(),
+        chapters=Chapter.query.all(),
+    )
+
+
+@admin_bp.route("/quizzes/<int:quiz_id>/edit", methods=["GET", "POST"])
+@login_required
+def quiz_edit(quiz_id):
+    if current_user.role != "admin":
+        flash("Access Denied", "error")
+        return redirect(url_for("auth.login"))
+
+    quiz = Quiz.query.get_or_404(quiz_id)
+    chapters = Chapter.query.get_or_404(quiz.chapter_id)
+    subjects = Subject.query.get_or_404(quiz.subject_id)
+
+    if request.method == "POST":
+        name = request.form.get("quiz_name")
+        remarks = request.form.get("remarks")
+        date_of_quiz = request.form.get("date_of_quiz")
+        time_duration = request.form.get("time_duration")
+
+        if not name:
+            flash("Please Enter The Quiz Name", "error")
+            return render_template(
+                "admin/quiz_form.html", quiz=quiz, subjects=subjects, chapters=chapters
+            )
+
+        if not date_of_quiz or not time_duration:
+            flash("Date And Time Duration Are Required", "error")
+            return render_template(
+                "admin/quiz_form.html", quiz=quiz, subjects=subjects, chapters=chapters
+            )
+
+        try:
+            date_of_quiz = datetime.strptime(date_of_quiz, "%Y-%m-%d").date()
+        except ValueError:
+            flash("Invalid Date Format", "error")
+            return render_template(
+                "admin/quiz_form.html", quiz=quiz, subjects=subjects, chapters=chapters
+            )
+
+        if not time_duration or len(time_duration) != 5 or time_duration[2] != ":":
+            flash("Time Duration Must Be In HH:MM Format", "error")
+            return render_template(
+                "admin/quiz_form.html", quiz=quiz, subjects=subjects, chapters=chapters
+            )
+
+        quiz.quiz_name = name
+        quiz.date_of_quiz = date_of_quiz
+        quiz.time_duration = time_duration
+        quiz.remarks = remarks
+        db.session.commit()
+
+        flash("Quiz Updated Successfully", "success")
+        return redirect(url_for("admin.quizzes_list"), quiz_id=quiz.id)
+
+    return render_template(
+        "admin/quiz_form.html", quiz=quiz, subjects=subjects, chapters=chapters
+    )
+
+
+@admin_bp.route("/quizzes/<int:quiz_id>/delete", methods=["POST"])
+@login_required
+def quiz_delete(quiz_id):
+    if current_user.role != "admin":
+        flash("Access Denied", "error")
+
+    quiz = Quiz.query.get_or_404(quiz_id)
+
+    db.session.delete(quiz)
+    db.session.commit()
+
+    flash("Quiz Deleted Successfully", "success")
+    return redirect(url_for("admin.quizzes_list"))
 
 
 # ---------------------------------------------------------------------------- #
 #                                QUESTION ROUTES                               #
 # ---------------------------------------------------------------------------- #
 
+
+@admin_bp.route("/quizzes/<int:quiz_id>/questions")
+@login_required
+def questions_list(quiz_id):
+    if current_user.role != "admin":
+        flash("Access Denied", "error")
+        return redirect(url_for("auth.login"))
+
+    quiz = Quiz.query.get_or_404(quiz_id)
+    questions = Question.query.filter_by(quiz_id=quiz_id).all()
+
+    return render_template("admin/question_list.html", quiz=quiz, questions=questions)
+
+
+@admin_bp.route("/quizzes/<int:quiz_id>/questions/new", methods=["GET", "POST"])
+@login_required
+def question_new(quiz_id):
+    if current_user.role != "admin":
+        flash("Access Denied", "error")
+
+    quiz = Quiz.query.get_or_404(quiz_id)
+
+    if request.method == "POST":
+        question_statement = request.form.get("question_statement")
+        option1 = request.form.get("option1")
+        option2 = request.form.get("option2")
+        option3 = request.form.get("option3")
+        option4 = request.form.get("option4")
+        correct_option = request.form.get("correct_option")
+
+        marks = request.form.get("marks")
+        negetive_marks = request.form.get("negetive_marks")
+
+        question = Question(
+            quiz_id=quiz_id,
+            question_statement=question_statement,
+            option1=option1,
+            option2=option2,
+            option3=option3,
+            option4=option4,
+            correct_option=correct_option,
+            marks=marks,
+            negetive_marks=negetive_marks,
+        )
+
+        db.session.add(question)
+        db.session.commit()
+
+        def save_image(file, prefix, quiz_id):
+            if file and file.filename != "":
+                file_name = secure_filename(file.file_name)
+                dot_index = file_name.rfind(".")
+
+                custom_filename = f"{prefix}_{file_name[:dot_index]}"
+                file_path = os.path.join(
+                    "static", "images", "{quiz_id}", custom_filename
+                )
+                file.save(file_path)
+
+                return custom_filename
+            return ""
+
+        question_image_path = save_image(
+            request.files.get("question_image"),
+            "Q{quiz_id}-QID{question.id}-question",
+            quiz_id="quiz.id",
+        )
+        option1_image_path = save_image(
+            request.files.get("option1_image"),
+            "Q{quiz_id}-QID{question.id}-option1",
+            quiz_id="quiz.id",
+        )
+        option2_image_path = save_image(
+            request.files.get("option2_image"),
+            "Q{quiz_id}-QID{question.id}-option2",
+            quiz_id="quiz.id",
+        )
+        option3_image_path = save_image(
+            request.files.get("option3_image"),
+            "Q{quiz_id}-QID{question.id}-option3",
+            quiz_id="quiz.id",
+        )
+        option4_image_path = save_image(
+            request.files.get("option4_image"),
+            "Q{quiz_id}-QID{question.id}-option4",
+            quiz_id="quiz.id",
+        )
+
+        question.question_image = question_image_path
+        question.question_image = option1_image_path
+        question.question_image = option2_image_path
+        question.question_image = option3_image_path
+        question.question_image = option4_image_path
+
+        db.session.commit()
+
+        flash("Question Created Successfully", "success")
+        return redirect(url_for("admin.questions_list", quiz_id=quiz_id))
+
+    return render_template("admin/question_form.html", quiz=quiz)
+
+
+@admin_bp.route("/questions/<int:question_id>/edit", methods=["GET", "POST"])
+@login_required
+def question_edit(question_id):
+    if current_user.role != "admin":
+        flash("Access Denied", "error")
+        return redirect(url_for("auth.login"))
+
+    question = Question.query.get_or_404(question_id)
+    quiz = Quiz.query.get_or_404(question.quiz_id)
+
+    if request.method == "POST":
+        question_statement = request.form.get("question_statement")
+        option1 = request.form.get("option1")
+        option2 = request.form.get("option2")
+        option3 = request.form.get("option3")
+        option4 = request.form.get("option4")
+        correct_option = request.form.get("correct_option")
+
+        marks = request.form.get("marks")
+        negetive_marks = request.form.get("negetive_marks")
+
+        if not (
+            question_statement
+            and option1
+            and option2
+            and option3
+            and option4
+            and correct_option
+        ):
+            flash("All Fields Are Required", "error")
+            return render_template(
+                "admin/question_form.html", question=question, quiz=quiz
+            )
+        try:
+            correct_option = int(correct_option)
+            if correct_option < 1 or correct_option > 4:
+                raise ValueError()
+        except ValueError:
+            flash("Correct Option Must Be Between 1 And 4", "error")
+            return render_template(
+                "admin/question_form.html", question=question, quiz=quiz
+            )
+
+        question.question_statement = question_statement
+        question.option1 = option1
+        question.option2 = option2
+        question.option3 = option3
+        question.option4 = option4
+        question.correct_option = correct_option
+
+        question.marks = marks
+        question.negetive_marks = negetive_marks
+
+        db.session.commit()
+
+        flash("Question Updated Successfully", "success")
+        return redirect(url_for("admin.questions_list", quiz_id=quiz.id))
+
+    return render_template("admin/question_form.html", question=question, quiz=quiz)
+
+
+@admin_bp.route("/questions/<int:question_id>/delete", methods=["POST"])
+@login_required
+def question_delete(question_id):
+    if current_user.role != "admin":
+        flash("Access denied", "error")
+        return redirect(url_for("auth.login"))
+
+    question = Question.query.get_or_404(question_id)
+    quiz_id = question.quiz_id
+
+    db.session.delete(question)
+    db.session.commit()
+
+    flash("Question deleted successfully", "success")
+    return redirect(url_for("admin.questions_list", quiz_id=quiz_id))
+
+
 # ---------------------------------------------------------------------------- #
 #                                  USER ROUTES                                 #
 # ---------------------------------------------------------------------------- #
+
+
+@admin_bp.route("/users")
+@login_required
+def users_list():
+    if current_user.role != "admin":
+        flash("Access Denied", "error")
+        return redirect(url_for("auth.login"))
+
+    users = User.query.all()
+    return render_template("admin/user_list.html", users=users)
+
+
+@admin_bp.route("/users/<int:user_id>/delete", methods=["POST"])
+def user_delete(user_id):
+    if current_user.role != "admin":
+        flash("Access Denied", "error")
+        return redirect(url_for("auth.login"))
+
+    user = User.query.get_or_404(user_id)
+
+    db.session.delete(user)
+    db.session.commit()
+
+    flash("User Deleted Successfully", "success")
+    return redirect(url_for("admin.users_list"))
+
+
+@admin_bp.route("/users/<int:user_id>/promote", methods=["POST"])
+def user_promote(user_id):
+    if current_user.role != "admin":
+        flash("Access Denied", "error")
+        return redirect(url_for("auth.login"))
+
+    user = User.query.get_or_404(user_id)
+    user.role = "admin"
+
+    db.session.commit()
+
+    flash("User Promoted To Admin", "success")
+    return redirect(url_for("admin.users_list"))
+
+
+@admin_bp.route("/users/<int:user_id>/demote", methods=["POST"])
+def user_demote(user_id):
+    if current_user.role != "admin":
+        flash("Access Denied", "error")
+
+    user = User.query.get_or_404(user_id)
+    user.role = "user"
+
+    db.session.commit()
+
+    flash("User Demoted To User", "success")
+    return redirect(url_for("admin.users_list"))
+
+
+# ---------------------------------------------------------------------------- #
+#                                  STATISTICS                                  #
+# ---------------------------------------------------------------------------- #
+
+
+@admin_bp.route("/statistics")  # Work With Quiz Attempt
+@login_required
+def statistics():
+    if current_user.role != "admin":
+        flash("Access Denied", "error")
+        return redirect(url_for("auth.login"))
+
+    if request.method == "POST":
+        quiz_attempt = QuizAttempt.query.all()
+
+    return render_template("admin/statistics.html", quiz_attempt=quiz_attempt)
