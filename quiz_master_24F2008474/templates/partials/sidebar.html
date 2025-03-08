@@ -1,251 +1,90 @@
-<div
-	class="d-flex justify-content-between align-items-center p-3 border-bottom">
-	<h5 class="mb-0 d-none d-lg-block">Admin Menu</h5>
-	<button
-		class="btn btn-sm btn-outline-primary d-lg-none"
-		type="button"
-		data-bs-toggle="offcanvas"
-		data-bs-target="#sidebarMenu"
-		aria-controls="sidebarMenu">
-		<i class="bi bi-list"></i> Menu
-	</button>
-</div>
-
-<!-- Desktop Sidebar (always visible on large screens) -->
-<div class="d-none d-lg-block p-3">
-	<ul class="nav nav-pills flex-column">
-		<li class="nav-item">
-			<a href="{{ url_for('admin.admin_dashboard') }}" class="nav-link active">
-				<i class="bi bi-speedometer2"></i> Dashboard
-			</a>
-		</li>
-		<li class="nav-item">
-			<a
-				href="#subjectsSubmenu"
-				data-bs-toggle="collapse"
-				class="nav-link d-flex justify-content-between align-items-center">
-				<span><i class="bi bi-book"></i> Subjects</span>
-				<i class="bi bi-chevron-down small"></i>
-			</a>
-			<div class="collapse" id="subjectsSubmenu">
-				<ul class="nav nav-pills flex-column ms-3">
-					<li class="nav-item">
-						<a href="#" class="nav-link"><i class="bi bi-dot"></i> View All</a>
-					</li>
-					<li class="nav-item">
-						<a href="#" class="nav-link"><i class="bi bi-dot"></i> Add New</a>
-					</li>
-				</ul>
-			</div>
-		</li>
-		<li class="nav-item">
-			<a
-				href="#chaptersSubmenu"
-				data-bs-toggle="collapse"
-				class="nav-link d-flex justify-content-between align-items-center">
-				<span><i class="bi bi-journal-text"></i> Chapters</span>
-				<i class="bi bi-chevron-down small"></i>
-			</a>
-			<div class="collapse" id="chaptersSubmenu">
-				<ul class="nav nav-pills flex-column ms-3">
-					<li class="nav-item">
-						<a href="#" class="nav-link"><i class="bi bi-dot"></i> View All</a>
-					</li>
-					<li class="nav-item">
-						<a href="#" class="nav-link"><i class="bi bi-dot"></i> Add New</a>
-					</li>
-				</ul>
-			</div>
-		</li>
-		<li class="nav-item">
-			<a
-				href="#quizzesSubmenu"
-				data-bs-toggle="collapse"
-				class="nav-link d-flex justify-content-between align-items-center">
-				<span><i class="bi bi-clipboard-check"></i> Quizzes</span>
-				<i class="bi bi-chevron-down small"></i>
-			</a>
-			<div class="collapse" id="quizzesSubmenu">
-				<ul class="nav nav-pills flex-column ms-3">
-					<li class="nav-item">
-						<a href="#" class="nav-link"><i class="bi bi-dot"></i> View All</a>
-					</li>
-					<li class="nav-item">
-						<a href="#" class="nav-link"><i class="bi bi-dot"></i> Add New</a>
-					</li>
-				</ul>
-			</div>
-		</li>
-		<li class="nav-item">
-			<a
-				href="#questionsSubmenu"
-				data-bs-toggle="collapse"
-				class="nav-link d-flex justify-content-between align-items-center">
-				<span><i class="bi bi-question-circle"></i> Questions</span>
-				<i class="bi bi-chevron-down small"></i>
-			</a>
-			<div class="collapse" id="questionsSubmenu">
-				<ul class="nav nav-pills flex-column ms-3">
-					<li class="nav-item">
-						<a href="#" class="nav-link"><i class="bi bi-dot"></i> View All</a>
-					</li>
-					<li class="nav-item">
-						<a href="#" class="nav-link"><i class="bi bi-dot"></i> Add New</a>
-					</li>
-				</ul>
-			</div>
-		</li>
-		<li class="nav-item">
-			<a
-				href="#usersSubmenu"
-				data-bs-toggle="collapse"
-				class="nav-link d-flex justify-content-between align-items-center">
-				<span><i class="bi bi-people"></i> Users</span>
-				<i class="bi bi-chevron-down small"></i>
-			</a>
-			<div class="collapse" id="usersSubmenu">
-				<ul class="nav nav-pills flex-column ms-3">
-					<li class="nav-item">
-						<a href="#" class="nav-link"><i class="bi bi-dot"></i> View All</a>
-					</li>
-					<li class="nav-item">
-						<a href="#" class="nav-link"><i class="bi bi-dot"></i> Add New</a>
-					</li>
-				</ul>
-			</div>
-		</li>
-	</ul>
-</div>
-
-<!-- Mobile Sidebar (offcanvas component for small screens) -->
-<div
-	class="offcanvas offcanvas-start"
-	tabindex="-1"
-	id="sidebarMenu"
-	aria-labelledby="sidebarMenuLabel">
-	<div class="offcanvas-header">
-		<h5 class="offcanvas-title" id="sidebarMenuLabel">Admin Menu</h5>
-		<button
-			type="button"
-			class="btn-close"
-			data-bs-dismiss="offcanvas"
-			aria-label="Close"></button>
+<!-- Sidebar -->
+<div class="col-md-3 col-lg-2 bg-white sidebar p-3" id="sidebar">
+	<div
+		class="d-flex align-items-center justify-content-between mb-4 pb-3 border-bottom">
+		<div class="d-flex align-items-center">
+			<i class="fas fa-graduation-cap fs-2 text-primary me-2"></i>
+			<h3 class="mb-0">Quiz Master</h3>
+		</div>
+		<button class="btn d-md-none" id="closeSidebar">
+			<i class="fas fa-times"></i>
+		</button>
 	</div>
-	<div class="offcanvas-body">
-		<ul class="nav nav-pills flex-column">
-			<li class="nav-item">
-				<a
-					href="{{ url_for('admin.admin_dashboard') }}"
-					class="nav-link active">
-					<i class="bi bi-speedometer2"></i> Dashboard
-				</a>
-			</li>
-			<li class="nav-item">
-				<a
-					href="#mobileSubjectsSubmenu"
-					data-bs-toggle="collapse"
-					class="nav-link d-flex justify-content-between align-items-center">
-					<span><i class="bi bi-book"></i> Subjects</span>
-					<i class="bi bi-chevron-down small"></i>
-				</a>
-				<div class="collapse" id="mobileSubjectsSubmenu">
-					<ul class="nav nav-pills flex-column ms-3">
-						<li class="nav-item">
-							<a href="#" class="nav-link"
-								><i class="bi bi-dot"></i> View All</a
-							>
-						</li>
-						<li class="nav-item">
-							<a href="#" class="nav-link"><i class="bi bi-dot"></i> Add New</a>
-						</li>
-					</ul>
-				</div>
-			</li>
-			<!-- Repeat other menu items for mobile view -->
-			<li class="nav-item">
-				<a
-					href="#mobileChaptersSubmenu"
-					data-bs-toggle="collapse"
-					class="nav-link d-flex justify-content-between align-items-center">
-					<span><i class="bi bi-journal-text"></i> Chapters</span>
-					<i class="bi bi-chevron-down small"></i>
-				</a>
-				<div class="collapse" id="mobileChaptersSubmenu">
-					<ul class="nav nav-pills flex-column ms-3">
-						<li class="nav-item">
-							<a href="#" class="nav-link"
-								><i class="bi bi-dot"></i> View All</a
-							>
-						</li>
-						<li class="nav-item">
-							<a href="#" class="nav-link"><i class="bi bi-dot"></i> Add New</a>
-						</li>
-					</ul>
-				</div>
-			</li>
-			<li class="nav-item">
-				<a
-					href="#mobileQuizzesSubmenu"
-					data-bs-toggle="collapse"
-					class="nav-link d-flex justify-content-between align-items-center">
-					<span><i class="bi bi-clipboard-check"></i> Quizzes</span>
-					<i class="bi bi-chevron-down small"></i>
-				</a>
-				<div class="collapse" id="mobileQuizzesSubmenu">
-					<ul class="nav nav-pills flex-column ms-3">
-						<li class="nav-item">
-							<a href="#" class="nav-link"
-								><i class="bi bi-dot"></i> View All</a
-							>
-						</li>
-						<li class="nav-item">
-							<a href="#" class="nav-link"><i class="bi bi-dot"></i> Add New</a>
-						</li>
-					</ul>
-				</div>
-			</li>
-			<li class="nav-item">
-				<a
-					href="#mobileQuestionsSubmenu"
-					data-bs-toggle="collapse"
-					class="nav-link d-flex justify-content-between align-items-center">
-					<span><i class="bi bi-question-circle"></i> Questions</span>
-					<i class="bi bi-chevron-down small"></i>
-				</a>
-				<div class="collapse" id="mobileQuestionsSubmenu">
-					<ul class="nav nav-pills flex-column ms-3">
-						<li class="nav-item">
-							<a href="#" class="nav-link"
-								><i class="bi bi-dot"></i> View All</a
-							>
-						</li>
-						<li class="nav-item">
-							<a href="#" class="nav-link"><i class="bi bi-dot"></i> Add New</a>
-						</li>
-					</ul>
-				</div>
-			</li>
-			<li class="nav-item">
-				<a
-					href="#mobileUsersSubmenu"
-					data-bs-toggle="collapse"
-					class="nav-link d-flex justify-content-between align-items-center">
-					<span><i class="bi bi-people"></i> Users</span>
-					<i class="bi bi-chevron-down small"></i>
-				</a>
-				<div class="collapse" id="mobileUsersSubmenu">
-					<ul class="nav nav-pills flex-column ms-3">
-						<li class="nav-item">
-							<a href="#" class="nav-link"
-								><i class="bi bi-dot"></i> View All</a
-							>
-						</li>
-						<li class="nav-item">
-							<a href="#" class="nav-link"><i class="bi bi-dot"></i> Add New</a>
-						</li>
-					</ul>
-				</div>
-			</li>
-		</ul>
+
+	{% if current_user.is_authenticated and current_user.role == "admin" %}
+
+	<div class="nav flex-column">
+		<a
+			class="nav-link {% if request.endpoint == 'admin.admin_dashboard' %}active{% endif %} text-dark py-2 px-3"
+			href="{{ url_for('admin.admin_dashboard') }}">
+			<i class="fas fa-tachometer-alt me-2"></i> Dashboard
+		</a>
+		<a
+			class="nav-link {% if 'admin.subject' in request.endpoint %}active{% endif %} text-dark py-2 px-3"
+			href="{{ url_for('admin.subjects_list') }}">
+			<i class="fas fa-book me-2"></i> Subjects
+		</a>
+		<a
+			class="nav-link {% if 'admin.chapter' in request.endpoint %}active{% endif %} text-dark py-2 px-3"
+			href="{{ url_for('admin.chapters_list') }}">
+			<i class="fas fa-book me-2"></i> Chpaters
+		</a>
+		<a
+			class="nav-link {% if 'admin.quiz' in request.endpoint %}active{% endif %} text-dark py-2 px-3"
+			href="{{ url_for('admin.quizzes_list') }}">
+			<i class="fas fa-question-circle me-2"></i> Quizzes
+		</a>
+		<a
+			class="nav-link {% if 'admin.user' in request.endpoint %}active{% endif %} text-dark py-2 px-3"
+			href="{{ url_for('admin.users_list') }}">
+			<i class="fas fa-users me-2"></i> Users
+		</a>
+		<a
+			class="nav-link {% if request.endpoint == 'admin.statistics' %}active{% endif %} text-dark py-2 px-3"
+			href="{{ url_for('admin.statistics') }}">
+			<i class="fas fa-chart-bar me-2"></i> Statistics
+		</a>
+		<a
+			class="nav-link text-dark py-2 px-3 mt-5"
+			href="{{ url_for('auth.logout') }}">
+			<i class="fas fa-sign-out-alt me-2"></i> Logout
+		</a>
 	</div>
+
+	{% else %}
+
+	<div class="nav flex-column">
+		<a
+			class="nav-link {% if request.endpoint == 'admin.admin_dashboard' %}active{% endif %} text-dark py-2 px-3"
+			href="{{ url_for('admin.admin_dashboard') }}">
+			<i class="fas fa-tachometer-alt me-2"></i> Dashboard
+		</a>
+		<a
+			class="nav-link {% if 'admin.subject' in request.endpoint %}active{% endif %} text-dark py-2 px-3"
+			href="{{ url_for('admin.subjects_list') }}">
+			<i class="fas fa-book me-2"></i> Subjects
+		</a>
+		<a
+			class="nav-link {% if 'admin.chapter' in request.endpoint %}active{% endif %} text-dark py-2 px-3"
+			href="{{ url_for('admin.chapters_list') }}">
+			<i class="fas fa-book me-2"></i> Chpaters
+		</a>
+		<a
+			class="nav-link {% if 'admin.quiz' in request.endpoint %}active{% endif %} text-dark py-2 px-3"
+			href="{{ url_for('admin.quizzes_list') }}">
+			<i class="fas fa-question-circle me-2"></i> Quizzes
+		</a>
+		<a
+			class="nav-link {% if request.endpoint == 'admin.statistics' %}active{% endif %} text-dark py-2 px-3"
+			href="{{ url_for('admin.statistics') }}">
+			<i class="fas fa-chart-bar me-2"></i> Statistics
+		</a>
+		<a
+			class="nav-link text-dark py-2 px-3 mt-5"
+			href="{{ url_for('auth.logout') }}">
+			<i class="fas fa-sign-out-alt me-2"></i> Logout
+		</a>
+	</div>
+
+	{% endif %}
 </div>
