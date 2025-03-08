@@ -1,0 +1,366 @@
+{% extends 'base.html' %} {% block title %}{% if question %}Edit{% else %}New{%
+endif %} Question - {{ quiz.quiz_name }} - Quiz Master{% endblock %} {% block
+content %}
+<div
+	class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-2">
+	<div>
+		<h2 class="mb-0">{% if question %}Edit{% else %}Add{% endif %} Question</h2>
+		<p class="text-muted mb-0">Quiz: {{ quiz.quiz_name }}</p>
+		<p class="text-muted small mb-0">
+			{{ quiz.subject.name }} / {{ quiz.chapter.name }}
+		</p>
+	</div>
+</div>
+
+<!-- Flash Messages -->
+{% with messages = get_flashed_messages(with_categories=true) %} {% if messages
+%} {% for category, message in messages %}
+<div
+	class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show">
+	{{ message }}
+	<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+{% endfor %} {% endif %} {% endwith %}
+
+<div class="card shadow-sm">
+	<div class="card-body">
+		<form
+			method="POST"
+			class="needs-validation"
+			enctype="multipart/form-data"
+			novalidate>
+			<div class="row g-3">
+				<!-- Question Statement -->
+				<div class="col-12">
+					<label for="question_statement" class="form-label"
+						>Question <span class="text-danger">*</span></label
+					>
+					<textarea
+						class="form-control"
+						id="question_statement"
+						name="question_statement"
+						rows="3"
+						placeholder="Enter the question"
+						required>
+{% if question %}{{ question.question_statement }}{% endif %}</textarea
+					>
+					<div class="invalid-feedback">Please enter a question.</div>
+				</div>
+
+				<!-- Question Image -->
+				<div class="col-12 mb-3">
+					<label for="question_image" class="form-label"
+						>Question Image (Optional)</label
+					>
+					<input
+						type="file"
+						class="form-control"
+						id="question_image"
+						name="question_image"
+						accept="image/*" />
+					{% if question and question.question_image %}
+					<div class="mt-2">
+						<p class="mb-1">Current image:</p>
+						<img
+							src="{{ url_for('static', filename='images/' + quiz.id|string + '/' + question.question_image) }}"
+							alt="Question Image"
+							class="img-thumbnail"
+							style="max-height: 100px" />
+					</div>
+					{% endif %}
+				</div>
+
+				<div class="col-md-6 mb-3">
+					<label for="marks" class="form-label"
+						>Marks <span class="text-danger">*</span></label
+					>
+					<input
+						type="number"
+						class="form-control"
+						id="marks"
+						name="marks"
+						min="1"
+						value="{% if question %}{{ question.marks }}{% else %}4{% endif %}"
+						required />
+					<div class="invalid-feedback">
+						Please specify marks for this question.
+					</div>
+				</div>
+
+				<div class="col-md-6 mb-3">
+					<label for="negative_marks" class="form-label"
+						>Negative Marks <span class="text-danger">*</span></label
+					>
+					<input
+						type="number"
+						class="form-control"
+						id="negative_marks"
+						name="negative_marks"
+						min="0"
+						value="{% if question %}{{ question.negative_marks }}{% else %}1{% endif %}"
+						required />
+					<div class="invalid-feedback">
+						Please specify negative marks for this question.
+					</div>
+				</div>
+
+				<!-- Options Section -->
+				<div class="col-12">
+					<h5 class="border-bottom pb-2">Options</h5>
+				</div>
+
+				<!-- Option 1 -->
+				<div class="col-md-6 mb-3">
+					<label for="option1" class="form-label"
+						>Option A <span class="text-danger">*</span></label
+					>
+					<textarea
+						class="form-control"
+						id="option1"
+						name="option1"
+						rows="2"
+						placeholder="Enter option A"
+						required>
+{% if question %}{{ question.option1 }}{% endif %}</textarea
+					>
+					<div class="invalid-feedback">Please fill in option A.</div>
+
+					<div class="mt-2">
+						<label for="option1_image" class="form-label"
+							>Option A Image (Optional)</label
+						>
+						<input
+							type="file"
+							class="form-control"
+							id="option1_image"
+							name="option1_image"
+							accept="image/*" />
+						{% if question and question.option1_image %}
+						<div class="mt-2">
+							<p class="mb-1">Current image:</p>
+							<img
+								src="{{ url_for('static', filename='images/' + quiz.id|string + '/' + question.option1_image) }}"
+								alt="Option 1 Image"
+								class="img-thumbnail"
+								style="max-height: 80px" />
+						</div>
+						{% endif %}
+					</div>
+				</div>
+
+				<!-- Option 2 -->
+				<div class="col-md-6 mb-3">
+					<label for="option2" class="form-label"
+						>Option B <span class="text-danger">*</span></label
+					>
+					<textarea
+						class="form-control"
+						id="option2"
+						name="option2"
+						rows="2"
+						placeholder="Enter option B"
+						required>
+{% if question %}{{ question.option2 }}{% endif %}</textarea
+					>
+					<div class="invalid-feedback">Please fill in option B.</div>
+
+					<div class="mt-2">
+						<label for="option2_image" class="form-label"
+							>Option B Image (Optional)</label
+						>
+						<input
+							type="file"
+							class="form-control"
+							id="option2_image"
+							name="option2_image"
+							accept="image/*" />
+						{% if question and question.option2_image %}
+						<div class="mt-2">
+							<p class="mb-1">Current image:</p>
+							<img
+								src="{{ url_for('static', filename='images/' + quiz.id|string + '/' + question.option2_image) }}"
+								alt="Option 2 Image"
+								class="img-thumbnail"
+								style="max-height: 80px" />
+						</div>
+						{% endif %}
+					</div>
+				</div>
+
+				<!-- Option 3 -->
+				<div class="col-md-6 mb-3">
+					<label for="option3" class="form-label"
+						>Option C <span class="text-danger">*</span></label
+					>
+					<textarea
+						class="form-control"
+						id="option3"
+						name="option3"
+						rows="2"
+						placeholder="Enter option C"
+						required>
+{% if question %}{{ question.option3 }}{% endif %}</textarea
+					>
+					<div class="invalid-feedback">Please fill in option C.</div>
+
+					<div class="mt-2">
+						<label for="option3_image" class="form-label"
+							>Option C Image (Optional)</label
+						>
+						<input
+							type="file"
+							class="form-control"
+							id="option3_image"
+							name="option3_image"
+							accept="image/*" />
+						{% if question and question.option3_image %}
+						<div class="mt-2">
+							<p class="mb-1">Current image:</p>
+							<img
+								src="{{ url_for('static', filename='images/' + quiz.id|string + '/' + question.option3_image) }}"
+								alt="Option 3 Image"
+								class="img-thumbnail"
+								style="max-height: 80px" />
+						</div>
+						{% endif %}
+					</div>
+				</div>
+
+				<!-- Option 4 -->
+				<div class="col-md-6 mb-3">
+					<label for="option4" class="form-label"
+						>Option D <span class="text-danger">*</span></label
+					>
+					<textarea
+						class="form-control"
+						id="option4"
+						name="option4"
+						rows="2"
+						placeholder="Enter option D"
+						required>
+{% if question %}{{ question.option4 }}{% endif %}</textarea
+					>
+					<div class="invalid-feedback">Please fill in option D.</div>
+
+					<div class="mt-2">
+						<label for="option4_image" class="form-label"
+							>Option D Image (Optional)</label
+						>
+						<input
+							type="file"
+							class="form-control"
+							id="option4_image"
+							name="option4_image"
+							accept="image/*" />
+						{% if question and question.option4_image %}
+						<div class="mt-2">
+							<p class="mb-1">Current image:</p>
+							<img
+								src="{{ url_for('static', filename='images/' + quiz.id|string + '/' + question.option4_image) }}"
+								alt="Option 4 Image"
+								class="img-thumbnail"
+								style="max-height: 80px" />
+						</div>
+						{% endif %}
+					</div>
+				</div>
+
+				<!-- Correct Answer -->
+				<div class="col-12 mb-3">
+					<label class="form-label"
+						>Correct Answer <span class="text-danger">*</span></label
+					>
+					<div>
+						<div class="form-check form-check-inline">
+							<input class="form-check-input" type="radio" name="correct_option"
+							id="correct1" value="1" {% if question and
+							question.correct_options == 1 %}checked{% endif %} required>
+							<label class="form-check-label" for="correct1">Option A</label>
+						</div>
+						<div class="form-check form-check-inline">
+							<input class="form-check-input" type="radio" name="correct_option"
+							id="correct2" value="2" {% if question and
+							question.correct_options == 2 %}checked{% endif %} required>
+							<label class="form-check-label" for="correct2">Option B</label>
+						</div>
+						<div class="form-check form-check-inline">
+							<input class="form-check-input" type="radio" name="correct_option"
+							id="correct3" value="3" {% if question and
+							question.correct_options == 3 %}checked{% endif %} required>
+							<label class="form-check-label" for="correct3">Option C</label>
+						</div>
+						<div class="form-check form-check-inline">
+							<input class="form-check-input" type="radio" name="correct_option"
+							id="correct4" value="4" {% if question and
+							question.correct_options == 4 %}checked{% endif %} required>
+							<label class="form-check-label" for="correct4">Option D</label>
+						</div>
+						<div class="invalid-feedback d-block">
+							{% if not question or not question.correct_options %}Please select
+							the correct answer.{% endif %}
+						</div>
+					</div>
+				</div>
+
+				<!-- Form Buttons -->
+				<div class="col-12 mt-4 d-flex gap-2">
+					<button type="submit" class="btn btn-primary">
+						<i class="fas fa-save me-1"></i> {% if question %}Update{% else
+						%}Add{% endif %} Question
+					</button>
+					<a
+						href="{{ url_for('admin.questions_list', quiz_id=quiz.id) }}"
+						class="btn btn-outline-secondary">
+						<i class="fas fa-times me-1"></i> Cancel
+					</a>
+				</div>
+			</div>
+		</form>
+	</div>
+</div>
+
+<!-- Back Navigation -->
+<div class="mt-3">
+	<a
+		href="{{ url_for('admin.questions_list', quiz_id=quiz.id) }}"
+		class="btn btn-outline-secondary">
+		<i class="fas fa-arrow-left me-1"></i> Back to Questions
+	</a>
+</div>
+{% endblock %} {% block additional_styles %}
+<style>
+	.form-control:focus,
+	.form-select:focus {
+		border-color: #2f6dc9ce;
+		box-shadow: 0 0 0 0.25rem rgba(47, 109, 201, 0.25);
+	}
+</style>
+{% endblock %} {% block scripts %}
+<script>
+	document.addEventListener("DOMContentLoaded", function () {
+		// Highlight the active link in sidebar
+		const quizzesLink = document.querySelector(
+			'a[href="{{ url_for("admin.quizzes_list") }}"]'
+		);
+		if (quizzesLink) {
+			quizzesLink.classList.add("active");
+		}
+
+		// Form validation
+		const forms = document.querySelectorAll(".needs-validation");
+		Array.prototype.slice.call(forms).forEach(function (form) {
+			form.addEventListener(
+				"submit",
+				function (event) {
+					if (!form.checkValidity()) {
+						event.preventDefault();
+						event.stopPropagation();
+					}
+					form.classList.add("was-validated");
+				},
+				false
+			);
+		});
+	});
+</script>
+{% endblock %}
