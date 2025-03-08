@@ -1,212 +1,262 @@
-{% extends "base.html" %} {% block title %}Admin Dashboard | QuizMaster{%
-endblock %} {% set has_sidebar = true %} {% block sidebar %} {% include
-"partials/sidebar.html" %}
-<div class="row g-0">
-	<div class="col-lg-10 py-3 px-3 px-lg-4">
-		{% block content %}
-		<!-- Page Header -->
-		<div class="d-flex justify-content-between align-items-center mb-4">
-			<h4 class="mb-0">Admin Dashboard</h4>
-			<ol class="breadcrumb mb-0">
-				<li class="breadcrumb-item">
-					<a href="#" class="text-decoration-none">Home</a>
-				</li>
-				<li class="breadcrumb-item active">Dashboard</li>
-			</ol>
-		</div>
+{% extends 'base.html' %} {% block title %}Admin Dashboard - Quiz Master{%
+endblock %} {% block content %}
+<div
+	class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-2">
+	<h2 class="mb-0">Admin Dashboard</h2>
+	<div class="d-flex align-items-center">
+		<span class="me-3 d-none d-sm-inline"
+			>Welcome, {{ current_user.full_name }}</span
+		>
+	</div>
+</div>
 
-		<!-- Stats Row -->
-		<div class="row g-4 mb-4">
-			<div class="col-md-3">
-				<div class="card stat-card h-100">
-					<div class="card-body">
-						<div class="d-flex justify-content-between">
-							<div>
-								<h6 class="text-muted mb-2">Total Users</h6>
-								<h4 class="mb-0">{{ users|length }}</h4>
-							</div>
-							<div class="stat-icon rounded">
-								<i class="bi bi-people-fill fs-4"></i>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="col-md-3">
-				<div class="card stat-card h-100">
-					<div class="card-body">
-						<div class="d-flex justify-content-between">
-							<div>
-								<h6 class="text-muted mb-2">Total Subjects</h6>
-								<h4 class="mb-0">{{ subject|length }}</h4>
-							</div>
-							<div class="stat-icon rounded">
-								<i class="bi bi-book-fill fs-4"></i>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="col-md-3">
-				<div class="card stat-card h-100">
-					<div class="card-body">
-						<div class="d-flex justify-content-between">
-							<div>
-								<h6 class="text-muted mb-2">Total Quizzes</h6>
-								<h4 class="mb-0">{{ quiz|length }}</h4>
-							</div>
-							<div class="stat-icon rounded">
-								<i class="bi bi-clipboard-check-fill fs-4"></i>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="col-md-3">
-				<div class="card stat-card h-100">
-					<div class="card-body">
-						<div class="d-flex justify-content-between">
-							<div>
-								<h6 class="text-muted mb-2">Total Questions</h6>
-								<h4 class="mb-0">{{ question|length }}</h4>
-							</div>
-							<div class="stat-icon rounded">
-								<i class="bi bi-question-circle-fill fs-4"></i>
-							</div>
-						</div>
-					</div>
-				</div>
+<!-- Flash Messages -->
+{% with messages = get_flashed_messages(with_categories=true) %} {% if messages
+%} {% for category, message in messages %}
+<div
+	class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show">
+	{{ message }}
+	<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+{% endfor %} {% endif %} {% endwith %}
+
+<!-- Stats Cards Row -->
+<div class="row mb-4 g-2">
+	<div class="col-6 col-md-3">
+		<div class="stat-card card bg-info text-white p-2 p-md-3 h-100">
+			<div class="card-body">
+				<h5 class="card-title">Quizzes</h5>
+				<p class="card-text display-6">{{ quiz|length }}</p>
+				<a
+					href="{{ url_for('admin.quizzes_list') }}"
+					class="text-white text-decoration-none">
+					View all <i class="fas fa-arrow-right ms-1"></i>
+				</a>
 			</div>
 		</div>
-
-		<div class="row g-4 mb-4">
-			<!-- Recent Subjects -->
-			<div class="col-md-6">
-				<div class="card h-100">
-					<div
-						class="card-header d-flex justify-content-between align-items-center">
-						<h5 class="mb-0">Recent Subjects</h5>
-						<a href="#" class="btn btn-sm btn-outline-primary">Add New</a>
-					</div>
-					<div class="card-body">
-						<div class="table-responsive">
-							<table class="table table-hover">
-								<thead>
-									<tr>
-										<th scope="col">ID</th>
-										<th scope="col">Name</th>
-										<th scope="col">Chapters</th>
-									</tr>
-								</thead>
-								<tbody>
-									{% for sub in subject[:5] %}
-									<tr>
-										<td>{{ sub.id }}</td>
-										<td>{{ sub.name }}</td>
-										<td>{{ sub.chapters|length }}</td>
-									</tr>
-									{% else %}
-									<tr>
-										<td colspan="3" class="text-center">
-											No subjects available
-										</td>
-									</tr>
-									{% endfor %}
-								</tbody>
-							</table>
-						</div>
-					</div>
-				</div>
-			</div>
-
-			<!-- Recent Quizzes -->
-			<div class="col-md-6">
-				<div class="card h-100">
-					<div
-						class="card-header d-flex justify-content-between align-items-center">
-						<h5 class="mb-0">Recent Quizzes</h5>
-						<a href="#" class="btn btn-sm btn-outline-primary">Add New</a>
-					</div>
-					<div class="card-body">
-						<div class="table-responsive">
-							<table class="table table-hover">
-								<thead>
-									<tr>
-										<th scope="col">ID</th>
-										<th scope="col">Name</th>
-										<th scope="col">Date</th>
-										<th scope="col">Questions</th>
-									</tr>
-								</thead>
-								<tbody>
-									{% for q in quiz[:5] %}
-									<tr>
-										<td>{{ q.id }}</td>
-										<td>{{ q.quiz_name }}</td>
-										<td>{{ q.date_of_quiz.strftime('%d %b %Y') }}</td>
-										<td>{{ q.questions|length }}</td>
-									</tr>
-									{% else %}
-									<tr>
-										<td colspan="4" class="text-center">
-											No quizzes available
-										</td>
-									</tr>
-									{% endfor %}
-								</tbody>
-							</table>
-						</div>
-					</div>
-				</div>
+	</div>
+	<div class="col-6 col-md-3">
+		<div class="stat-card card bg-primary text-white p-2 p-md-3 h-100">
+			<div class="card-body">
+				<h5 class="card-title">Users</h5>
+				<p class="card-text display-6">{{ users|length }}</p>
+				<a
+					href="{{ url_for('admin.users_list') }}"
+					class="text-white text-decoration-none">
+					View all <i class="fas fa-arrow-right ms-1"></i>
+				</a>
 			</div>
 		</div>
+	</div>
+	<div class="col-6 col-md-3">
+		<div class="stat-card card bg-success text-white p-2 p-md-3 h-100">
+			<div class="card-body">
+				<h5 class="card-title">Subjects</h5>
+				<p class="card-text display-6">{{ subject|length }}</p>
+				<a
+					href="{{ url_for('admin.subjects_list') }}"
+					class="text-white text-decoration-none">
+					View all <i class="fas fa-arrow-right ms-1"></i>
+				</a>
+			</div>
+		</div>
+	</div>
+	<div class="col-6 col-md-3">
+		<div class="stat-card card bg-warning text-dark p-2 p-md-3 h-100">
+			<div class="card-body">
+				<h5 class="card-title">Chapters</h5>
+				<p class="card-text display-6">{{ chapter|length }}</p>
+				<a
+					href="{{ url_for('admin.chapters_list') }}"
+					class="text-white text-decoration-none">
+					View all <i class="fas fa-arrow-right ms-1"></i>
+				</a>
+			</div>
+		</div>
+	</div>
+</div>
 
-		<!-- Recent Users -->
-		<div class="card">
+<div class="row g-3">
+	<!-- Recent Subjects Table -->
+	<div class="col-12 col-lg-6 mb-3">
+		<div class="card table-container">
 			<div
-				class="card-header d-flex justify-content-between align-items-center">
-				<h5 class="mb-0">Recent Users</h5>
-				<a href="#" class="btn btn-sm btn-outline-primary">View All</a>
+				class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap gap-2">
+				<h5 class="mb-0">Recent Subjects</h5>
+				<a
+					href="{{ url_for('admin.subjects_list') }}"
+					class="btn btn-primary btn-sm">
+					<i class="fas fa-plus me-1"></i> Add New
+				</a>
 			</div>
 			<div class="card-body">
 				<div class="table-responsive">
 					<table class="table table-hover">
 						<thead>
 							<tr>
-								<th scope="col">ID</th>
-								<th scope="col">Username</th>
-								<th scope="col">Full Name</th>
-								<th scope="col">Email</th>
-								<th scope="col">Role</th>
-								<th scope="col">Quiz Attempts</th>
+								<th>Name</th>
+								<th class="d-none d-md-table-cell">Description</th>
+								<th>Actions</th>
 							</tr>
 						</thead>
 						<tbody>
-							{% for user in users[:5] %}
+							{% for subj in subject[:5] %}
 							<tr>
-								<td>{{ user.id }}</td>
-								<td>{{ user.username }}</td>
-								<td>{{ user.full_name }}</td>
-								<td>{{ user.email }}</td>
-								<td>
-									<span
-										class="badge {{ 'bg-danger' if user.role == 'admin' else 'bg-primary' }}">
-										{{ user.role }}
-									</span>
+								<td>{{ subj.name }}</td>
+								<td class="d-none d-md-table-cell">
+									{{ subj.description|truncate(30) }}
 								</td>
-								<td>{{ user.quiz_attempts|length }}</td>
+								<td>
+									<a
+										href="{{ url_for('admin.subject_edit', subject_id=subj.id) }}"
+										class="btn btn-sm btn-outline-primary">
+										<i class="fas fa-edit"></i>
+									</a>
+									<a
+										href="{{ url_for('admin.chapters_list', subject_id=subj.id) }}"
+										class="btn btn-sm btn-outline-info">
+										<i class="fas fa-list"></i>
+									</a>
+								</td>
 							</tr>
-							{% else %}
+							{% endfor %} {% if not subject %}
 							<tr>
-								<td colspan="6" class="text-center">No users available</td>
+								<td colspan="3" class="text-center">No subjects found</td>
 							</tr>
-							{% endfor %}
+							{% endif %}
 						</tbody>
 					</table>
 				</div>
 			</div>
 		</div>
-		{% endblock content %}
+	</div>
+
+	<!-- Recent Quizzes Table -->
+	<div class="col-12 col-lg-6 mb-3">
+		<div class="card table-container">
+			<div
+				class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap gap-2">
+				<h5 class="mb-0">Recent Quizzes</h5>
+				<a
+					href="{{ url_for('admin.quizzes_list') }}"
+					class="btn btn-primary btn-sm">
+					<i class="fas fa-plus me-1"></i> Add New
+				</a>
+			</div>
+			<div class="card-body">
+				<div class="table-responsive">
+					<table class="table table-hover">
+						<thead>
+							<tr>
+								<th>Name</th>
+								<th>Date</th>
+								<th class="d-none d-sm-table-cell">Duration</th>
+								<th>Actions</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for q in quiz[:5] %}
+							<tr>
+								<td>{{ q.quiz_name }}</td>
+								<td>{{ q.date_of_quiz.strftime('%d-%m-%Y') }}</td>
+								<td class="d-none d-sm-table-cell">{{ q.time_duration }}</td>
+								<td>
+									<a
+										href="{{ url_for('admin.quiz_edit', quiz_id=q.id) }}"
+										class="btn btn-sm btn-outline-primary">
+										<i class="fas fa-edit"></i>
+									</a>
+									<a
+										href="{{ url_for('admin.questions_list', quiz_id=q.id) }}"
+										class="btn btn-sm btn-outline-info">
+										<i class="fas fa-question"></i>
+									</a>
+								</td>
+							</tr>
+							{% endfor %} {% if not quiz %}
+							<tr>
+								<td colspan="4" class="text-center">No quizzes found</td>
+							</tr>
+							{% endif %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Recent Users Table -->
+	<div class="col-12 mb-4">
+		<div class="card table-container">
+			<div
+				class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap gap-2">
+				<h5 class="mb-0">Recent Users</h5>
+				<a
+					href="{{ url_for('admin.users_list') }}"
+					class="btn btn-primary btn-sm"
+					>View All</a
+				>
+			</div>
+			<div class="card-body">
+				<div class="table-responsive">
+					<table class="table table-hover">
+						<thead>
+							<tr>
+								<th>Full Name</th>
+								<th class="d-none d-md-table-cell">Username</th>
+								<th class="d-none d-sm-table-cell">Email</th>
+								<th>Role</th>
+								<th>Actions</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for user in users[:5] %}
+							<tr>
+								<td>{{ user.full_name }}</td>
+								<td class="d-none d-md-table-cell">{{ user.username }}</td>
+								<td class="d-none d-sm-table-cell">{{ user.email }}</td>
+								<td>
+									<span
+										class="badge {% if user.role == 'admin' %}bg-danger{% else %}bg-success{% endif %}">
+										{{ user.role }}
+									</span>
+								</td>
+								<td>
+									{% if user.role != 'admin' %}
+									<form
+										action="{{ url_for('admin.user_promote', user_id=user.id) }}"
+										method="POST"
+										class="d-inline">
+										<button
+											type="submit"
+											class="btn btn-sm btn-outline-success">
+											<i class="fas fa-arrow-up"></i>
+										</button>
+									</form>
+									{% else %}
+									<form
+										action="{{ url_for('admin.user_demote', user_id=user.id) }}"
+										method="POST"
+										class="d-inline">
+										<button
+											type="submit"
+											class="btn btn-sm btn-outline-warning">
+											<i class="fas fa-arrow-down"></i>
+										</button>
+									</form>
+									{% endif %}
+								</td>
+							</tr>
+							{% endfor %} {% if not users %}
+							<tr>
+								<td colspan="5" class="text-center">No users found</td>
+							</tr>
+							{% endif %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
 	</div>
 </div>
-{% endblock sidebar %}
+{% endblock %}
