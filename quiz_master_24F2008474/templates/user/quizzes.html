@@ -1,0 +1,604 @@
+{% extends 'base.html' %} {% block title %}{{ subject.name }} Quizzes{% endblock
+%} {% block content %}
+<div
+	class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-2">
+	<h2 class="mb-0">Subjects</h2>
+	<a
+		href="{{ url_for('user.user_dashboard') }}"
+		class="btn btn-outline-secondary">
+		<i class="fas fa-arrow-left me-1"></i> Back to Dashboard
+	</a>
+</div>
+
+<!-- Flash Messages -->
+{% with messages = get_flashed_messages(with_categories=true) %} {% if messages
+%} {% for category, message in messages %}
+<div
+	class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show">
+	{{ message }}
+	<button
+		type="button"
+		class="btn-close"
+		data-bs-dismiss="alert"
+		aria-label="Close"></button>
+</div>
+{% endfor %} {% endif %} {% endwith %}
+
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-lg-8">
+			<!-- Quizzes Section -->
+			<div class="card shadow-sm mb-4">
+				<div class="card-header bg-white p-0">
+					<div
+						class="d-flex justify-content-between align-items-center flex-wrap gap-2 p-3">
+						<div class="d-flex align-items-center">
+							<div
+								class="icon icon-shape bg-gradient-primary shadow text-white text-center rounded-circle me-3">
+								<i class="fas fa-file-alt"></i>
+							</div>
+							<h5 class="mb-0">Available Quizzes</h5>
+						</div>
+						<div class="d-flex gap-2 align-items-center">
+							<div class="input-group input-group-sm">
+								<span class="input-group-text bg-white border-end-0">
+									<i class="fas fa-search text-muted"></i>
+								</span>
+								<input
+									type="text"
+									id="quizSearch"
+									class="form-control border-start-0 ps-0"
+									placeholder="Search quizzes..." />
+							</div>
+							{% if chapters %}
+							<div class="dropdown">
+								<button
+									class="btn btn-sm btn-outline-primary dropdown-toggle"
+									type="button"
+									id="chapterDropdown"
+									data-bs-toggle="dropdown"
+									aria-expanded="false">
+									<i class="fas fa-filter me-1"></i> Filter
+								</button>
+								<ul
+									class="dropdown-menu dropdown-menu-end"
+									aria-labelledby="chapterDropdown">
+									<li><h6 class="dropdown-header">Chapters</h6></li>
+									<li>
+										<a
+											class="dropdown-item"
+											href="javascript:filterQuizzes('all')"
+											>All Chapters</a
+										>
+									</li>
+									{% for chapter in chapters %}
+									<li>
+										<a
+											class="dropdown-item"
+											href="javascript:filterQuizzes('{{ chapter.id }}')"
+											>{{ chapter.name }}</a
+										>
+									</li>
+									{% endfor %}
+								</ul>
+							</div>
+							{% endif %}
+						</div>
+					</div>
+
+					<!-- Quiz Stats -->
+					{% if quizzes %}
+					<div class="quiz-stats px-3 py-2 bg-light border-top border-bottom">
+						<div class="row g-2 text-center">
+							<div class="col-4">
+								<div class="d-flex align-items-center justify-content-center">
+									<div
+										class="icon-sm bg-info-light text-info rounded-circle me-2">
+										<i class="fas fa-calendar-check"></i>
+									</div>
+									<div class="text-start">
+										<div class="text-xs text-muted">Total Quizzes</div>
+										<div class="fw-bold">{{ quizzes|length }}</div>
+									</div>
+								</div>
+							</div>
+							<div class="col-4">
+								<div class="d-flex align-items-center justify-content-center">
+									<div
+										class="icon-sm bg-success-light text-success rounded-circle me-2">
+										<i class="fas fa-check-circle"></i>
+									</div>
+									<div class="text-start">
+										<div class="text-xs text-muted">Attempted</div>
+										<div class="fw-bold">{{ user_attempts|length }}</div>
+									</div>
+								</div>
+							</div>
+							<div class="col-4">
+								<div class="d-flex align-items-center justify-content-center">
+									<div
+										class="icon-sm bg-warning-light text-warning rounded-circle me-2">
+										<i class="fas fa-hourglass-half"></i>
+									</div>
+									<div class="text-start">
+										<div class="text-xs text-muted">Pending</div>
+										<div class="fw-bold">
+											{{ quizzes|length - user_attempts|length }}
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					{% endif %}
+				</div>
+
+				<div class="card-body p-0">
+					{% if quizzes %}
+					<div class="table-responsive">
+						<table class="table align-items-center mb-0 quiz-table">
+							<thead>
+								<tr>
+									<th
+										class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-3">
+										Quiz
+									</th>
+									<th
+										class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">
+										Chapter
+									</th>
+									<th
+										class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+										Duration
+									</th>
+									<th
+										class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+										Your Score
+									</th>
+									<th
+										class="text-end text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 pe-3">
+										Actions
+									</th>
+								</tr>
+							</thead>
+							<tbody>
+								{% for quiz in quizzes %}
+								<tr
+									class="quiz-row"
+									data-chapter="{{ quiz.chapter_id }}"
+									data-name="{{ quiz.quiz_name.lower() }}"
+									data-date="{{ quiz.date_of_quiz.strftime('%b %d, %Y') }}">
+									<td class="ps-3">
+										<div class="d-flex py-2">
+											<div
+												class="quiz-icon me-3 d-flex align-items-center justify-content-center {{ 'attempted' if quiz.id in user_attempts else '' }}">
+												<i
+													class="fas {{ 'fa-check-circle' if quiz.id in user_attempts else 'fa-file-alt' }}"></i>
+											</div>
+											<div class="d-flex flex-column justify-content-center">
+												<h6 class="mb-0 text-sm">{{ quiz.quiz_name }}</h6>
+												<p class="text-xs text-secondary mb-0">
+													<i class="fas fa-calendar-alt me-1"></i> {{
+													quiz.date_of_quiz.strftime('%b %d, %Y') }}
+												</p>
+											</div>
+										</div>
+									</td>
+									<td>
+										<div class="chapter-badge">{{ quiz.chapter.name }}</div>
+									</td>
+									<td class="align-middle text-center">
+										<span class="time-badge">
+											<i class="fas fa-clock me-1"></i> {{ quiz.time_duration }}
+										</span>
+									</td>
+									<td class="align-middle text-center">
+										{% if quiz.id in user_attempts %} {% set attempt =
+										user_attempts[quiz.id] %}
+										<div class="score-display">
+											<div class="score-value">{{ attempt.total_score }}</div>
+											<div class="score-details">
+												<span
+													class="correct"
+													data-bs-toggle="tooltip"
+													data-bs-title="Correct">
+													{{ attempt.correct_answers }}
+												</span>
+												<span
+													class="wrong"
+													data-bs-toggle="tooltip"
+													data-bs-title="Wrong">
+													{{ attempt.wrong_answers }}
+												</span>
+												<span
+													class="skipped"
+													data-bs-toggle="tooltip"
+													data-bs-title="Skipped">
+													{{ attempt.skipped }}
+												</span>
+											</div>
+										</div>
+										{% else %}
+										<span class="status-badge not-attempted"
+											>Not attempted</span
+										>
+										{% endif %}
+									</td>
+									<td class="align-middle text-end pe-3">
+										{% if quiz.id in user_attempts %}
+										<div class="action-buttons">
+											<a
+												href="{{ url_for('user.quiz_results', score_id=user_attempts[quiz.id].id) }}"
+												class="btn-action view-results"
+												data-bs-toggle="tooltip"
+												title="View Results">
+												<i class="fas fa-eye"></i>
+											</a>
+											<a
+												href="{{ url_for('user.quiz_take', quiz_id=quiz.id, retake=1) }}"
+												class="btn-action retake-quiz"
+												data-bs-toggle="tooltip"
+												title="Retake Quiz">
+												<i class="fas fa-redo-alt"></i>
+											</a>
+										</div>
+										{% else %}
+										<a
+											href="{{ url_for('user.quiz_start', quiz_id=quiz.id) }}"
+											class="btn-start">
+											<i class="fas fa-play me-1"></i> Start Quiz
+										</a>
+										{% endif %}
+									</td>
+								</tr>
+								{% endfor %}
+							</tbody>
+						</table>
+					</div>
+					<div id="noQuizzesFound" class="d-none">
+						<div class="text-center py-5">
+							<div class="mb-3">
+								<i class="fas fa-search fa-3x text-secondary opacity-5"></i>
+							</div>
+							<h6 class="text-secondary">No matching quizzes found</h6>
+							<p class="text-xs text-muted">
+								Try a different search term or filter
+							</p>
+						</div>
+					</div>
+					{% else %}
+					<div class="text-center py-5">
+						<div class="mb-3">
+							<i class="fas fa-book-open fa-3x text-secondary opacity-5"></i>
+						</div>
+						<h6 class="text-secondary">
+							No quizzes available for this subject yet
+						</h6>
+						<p class="text-xs text-muted">Check back later for new quizzes</p>
+					</div>
+					{% endif %}
+				</div>
+			</div>
+
+			<!-- Chapters Section -->
+			{% if chapters %}
+			<div class="card shadow-sm mb-4">
+				<div class="card-header bg-white p-3">
+					<h5 class="mb-0">Chapters in {{ subject.name }}</h5>
+				</div>
+				<div class="card-body">
+					<div class="row g-3">
+						{% for chapter in chapters %}
+						<div class="col-md-6">
+							<div class="card card-body border h-100 chapter-card">
+								<div class="d-flex">
+									<div
+										class="icon icon-shape bg-gradient-success shadow text-white text-center rounded-circle me-3">
+										<i class="fas fa-book-open"></i>
+									</div>
+									<div>
+										<h6 class="mb-1">{{ chapter.name }}</h6>
+										<p class="text-sm text-muted mb-0">
+											{{ chapter.description|truncate(100) }}
+										</p>
+									</div>
+								</div>
+								<div class="mt-3 text-end">
+									<button
+										class="btn btn-sm btn-outline-primary chapter-filter-btn"
+										data-chapter="{{ chapter.id }}">
+										<i class="fas fa-filter me-1"></i> Show quizzes
+									</button>
+								</div>
+							</div>
+						</div>
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+			{% endif %}
+		</div>
+
+		<div class="col-lg-4">
+			<!-- Your Performance -->
+			{% if user_attempts %}
+			<div class="card shadow-sm mb-4">
+				<div class="card-header bg-white p-3">
+					<div class="d-flex align-items-center">
+						<div
+							class="icon icon-shape bg-gradient-success shadow text-white text-center rounded-circle me-3">
+							<i class="fas fa-chart-line"></i>
+						</div>
+						<h5 class="mb-0">Your Performance</h5>
+					</div>
+				</div>
+				<div class="card-body">
+					{% set total_score = namespace(value=0) %} {% set total_correct =
+					namespace(value=0) %} {% set total_wrong = namespace(value=0) %} {%
+					set total_skipped = namespace(value=0) %} {% for quiz_id, attempt in
+					user_attempts.items() %} {% set total_score.value = total_score.value
+					+ attempt.total_score %} {% set total_correct.value =
+					total_correct.value + attempt.correct_answers %} {% set
+					total_wrong.value = total_wrong.value + attempt.wrong_answers %} {%
+					set total_skipped.value = total_skipped.value + attempt.skipped %} {%
+					endfor %} {% set total_questions = total_correct.value +
+					total_wrong.value + total_skipped.value %} {% set accuracy =
+					(total_correct.value / total_questions * 100)|round if total_questions
+					> 0 else 0 %}
+
+					<div class="text-center mb-3">
+						<div
+							class="large-score-circle mx-auto {{ 'bg-success' if accuracy >= 70 else ('bg-warning' if accuracy >= 40 else 'bg-danger') }}">
+							<div class="d-flex flex-column">
+								<span class="h2 mb-0 text-white">{{ accuracy }}%</span>
+								<span class="text-white text-opacity-8 text-sm">Accuracy</span>
+							</div>
+						</div>
+					</div>
+
+					<div class="row text-center g-3 mb-3">
+						<div class="col-4">
+							<div class="p-2 border rounded h-100">
+								<div class="text-success h4 mb-1">
+									{{ total_correct.value }}
+								</div>
+								<div class="text-xs text-uppercase">Correct</div>
+							</div>
+						</div>
+						<div class="col-4">
+							<div class="p-2 border rounded h-100">
+								<div class="text-danger h4 mb-1">{{ total_wrong.value }}</div>
+								<div class="text-xs text-uppercase">Wrong</div>
+							</div>
+						</div>
+						<div class="col-4">
+							<div class="p-2 border rounded h-100">
+								<div class="text-warning h4 mb-1">
+									{{ total_skipped.value }}
+								</div>
+								<div class="text-xs text-uppercase">Skipped</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="text-center">
+						<a
+							href="{{ url_for('user.my_scores') }}"
+							class="btn btn-sm btn-outline-primary">
+							<i class="fas fa-chart-bar me-1"></i> View Detailed Analytics
+						</a>
+					</div>
+				</div>
+			</div>
+			{% else %}
+			<div class="card shadow-sm mb-4">
+				<div class="card-header bg-white p-3">
+					<div class="d-flex align-items-center">
+						<div
+							class="icon icon-shape bg-gradient-success shadow text-white text-center rounded-circle me-3">
+							<i class="fas fa-chart-line"></i>
+						</div>
+						<h5 class="mb-0">Your Performance</h5>
+					</div>
+				</div>
+				<div class="card-body">
+					<div class="text-center py-5">
+						<div class="mb-3">
+							<i class="fas fa-chart-line fa-3x text-secondary opacity-5"></i>
+						</div>
+						<h6 class="text-secondary">No quizzes attempted yet</h6>
+						<p class="text-xs text-muted">
+							Start attempting quizzes to view your performance
+						</p>
+					</div>
+				</div>
+				{% endif %}
+			</div>
+		</div>
+	</div>
+	{% endblock %} {% block additional_styles %}
+	<style>
+		.icon-shape {
+			width: 36px;
+			height: 36px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+
+		.table > :not(caption) > * > * {
+			padding: 0.75rem 0.5rem;
+			vertical-align: middle;
+		}
+
+		.score-circle {
+			width: 32px;
+			height: 32px;
+			border-radius: 50%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			color: white;
+			font-weight: bold;
+			font-size: 12px;
+		}
+
+		.large-score-circle {
+			width: 150px;
+			height: 150px;
+			border-radius: 50%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+
+		.icon-circle {
+			width: 40px;
+			height: 40px;
+			border-radius: 50%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			flex-shrink: 0;
+		}
+
+		.bg-info-light {
+			background-color: rgba(17, 205, 239, 0.1);
+		}
+
+		.bg-success-light {
+			background-color: rgba(45, 206, 137, 0.1);
+		}
+
+		.bg-warning-light {
+			background-color: rgba(251, 99, 64, 0.1);
+		}
+
+		.bg-danger-light {
+			background-color: rgba(245, 54, 92, 0.1);
+		}
+
+		.chapter-card {
+			transition: all 0.3s ease;
+		}
+
+		.chapter-card:hover {
+			transform: translateY(-5px);
+		}
+
+		@media (max-width: 767.98px) {
+			.table > :not(caption) > * > * {
+				padding: 0.5rem 0.25rem;
+			}
+
+			.score-circle {
+				width: 28px;
+				height: 28px;
+				font-size: 11px;
+			}
+		}
+	</style>
+	{% endblock %} {% block scripts %}
+	<script>
+		document.addEventListener("DOMContentLoaded", function () {
+			// Initialize tooltips
+			var tooltips = [].slice.call(
+				document.querySelectorAll('[data-bs-toggle="tooltip"]')
+			);
+			tooltips.map(function (tooltip) {
+				return new bootstrap.Tooltip(tooltip);
+			});
+
+			// Quiz search functionality
+			const searchInput = document.getElementById("quizSearch");
+			const quizRows = document.querySelectorAll(".quiz-row");
+			const noQuizzesFound = document.getElementById("noQuizzesFound");
+
+			searchInput.addEventListener("keyup", function () {
+				filterQuizzes("all", this.value.toLowerCase());
+			});
+
+			// Chapter filter buttons
+			document.querySelectorAll(".chapter-filter-btn").forEach((button) => {
+				button.addEventListener("click", function () {
+					const chapterId = this.getAttribute("data-chapter");
+					filterQuizzes(chapterId);
+					searchInput.value = "";
+
+					// Scroll to quizzes section
+					document
+						.querySelector(".card.shadow-sm")
+						.scrollIntoView({behavior: "smooth"});
+				});
+			});
+
+			// Initialize with all quizzes visible
+			filterQuizzes("all");
+
+			function filterQuizzes(chapterId, searchTerm = "") {
+				let visibleCount = 0;
+
+				quizRows.forEach((row) => {
+					const rowChapterId = row.getAttribute("data-chapter");
+					const rowName = row.getAttribute("data-name");
+					const rowDate = row.getAttribute("data-date");
+
+					const matchesChapter =
+						chapterId === "all" || rowChapterId === chapterId;
+					const matchesSearch =
+						!searchTerm ||
+						rowName.includes(searchTerm) ||
+						rowDate.toLowerCase().includes(searchTerm);
+
+					if (matchesChapter && matchesSearch) {
+						row.style.display = "";
+						visibleCount++;
+					} else {
+						row.style.display = "none";
+					}
+				});
+
+				// Show/hide "no quizzes found" message
+				if (visibleCount === 0 && quizRows.length > 0) {
+					noQuizzesFound.classList.remove("d-none");
+				} else {
+					noQuizzesFound.classList.add("d-none");
+				}
+			}
+		});
+
+		// Function to be called from dropdown menu
+		function filterQuizzes(chapterId) {
+			const event = new CustomEvent("filterChange", {
+				detail: {chapterId: chapterId},
+			});
+			document.dispatchEvent(event);
+
+			document.querySelectorAll(".quiz-row").forEach((row) => {
+				const rowChapterId = row.getAttribute("data-chapter");
+
+				if (chapterId === "all" || rowChapterId === chapterId) {
+					row.style.display = "";
+				} else {
+					row.style.display = "none";
+				}
+			});
+
+			// Update dropdown button text
+			const dropdownButton = document.getElementById("chapterDropdown");
+			if (dropdownButton) {
+				if (chapterId === "all") {
+					dropdownButton.innerHTML =
+						'<i class="fas fa-filter me-1"></i> Filter';
+				} else {
+					const chapterName = document.querySelector(
+						`.dropdown-item[href="javascript:filterQuizzes('${chapterId}')"]`
+					).textContent;
+					dropdownButton.innerHTML =
+						'<i class="fas fa-filter me-1"></i> ' + chapterName;
+				}
+			}
+		}
+	</script>
+	{% endblock %}
+</div>
