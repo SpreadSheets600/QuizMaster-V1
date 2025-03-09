@@ -1,0 +1,265 @@
+{% extends 'base.html' %} {% block title %}Quiz: {{ quiz.quiz_name }}{% endblock
+%} {% block content %}
+<div class="container-fluid py-4">
+	<div class="row">
+		<div class="col-12">
+			<div class="card mb-4">
+				<div
+					class="card-header pb-0 d-flex justify-content-between align-items-center">
+					<h6 class="mb-0">{{ quiz.quiz_name }}</h6>
+					<div class="d-flex align-items-center">
+						<div id="timer" class="badge bg-primary p-2">
+							Time Remaining:
+							<span id="minutes">{{ duration_minutes }}</span>:<span
+								id="seconds"
+								>00</span
+							>
+						</div>
+					</div>
+				</div>
+				<div class="card-body">
+					<form
+						id="quizForm"
+						method="POST"
+						action="{{ url_for('user.quiz_take', quiz_id=quiz.id) }}">
+						<div class="mb-3">
+							<button
+								type="button"
+								class="btn btn-sm btn-outline-secondary"
+								data-bs-toggle="collapse"
+								data-bs-target="#instructionsCollapse">
+								<i class="fas fa-info-circle"></i> Toggle Instructions
+							</button>
+
+							<div class="collapse mt-2" id="instructionsCollapse">
+								<div class="alert alert-info">
+									<strong>Instructions:</strong>
+									<ul>
+										<li>
+											Each correct answer awards {{ questions[0].marks }} marks
+										</li>
+										<li>
+											Each wrong answer deducts {{ questions[0].negative_marks
+											}} mark
+										</li>
+										<li>
+											Unanswered questions are counted as skipped (no marks
+											deducted)
+										</li>
+										<li>Your quiz will auto-submit when the timer expires</li>
+									</ul>
+								</div>
+							</div>
+						</div>
+
+						{% for question in questions %}
+						<div class="card mb-4">
+							<div
+								class="card-header bg-light d-flex justify-content-between align-items-center">
+								<div>
+									<span class="fw-bold"
+										>Q{{ loop.index }}. {{ question.question_statement }}</span
+									>
+								</div>
+								<div>
+									<span class="badge bg-success"
+										>+{{ question.marks }} marks</span
+									>
+									<span class="badge bg-danger ms-1"
+										>-{{ question.negative_marks }} marks</span
+									>
+									<button
+										class="btn btn-sm btn-link text-primary ms-2"
+										type="button"
+										data-bs-toggle="collapse"
+										data-bs-target="#question{{ question.id }}Content"
+										aria-expanded="true">
+										<i class="fas fa-chevron-up"></i>
+									</button>
+								</div>
+							</div>
+
+							<div id="question{{ question.id }}Content" class="collapse show">
+								<div class="card-body">
+									{% if question.question_image %}
+									<div class="mb-3">
+										<img
+											src="{{ url_for('static', filename='uploads/' + question.question_image) }}"
+											alt="Question Image"
+											class="img-fluid rounded mb-3"
+											style="max-width: 400px" />
+									</div>
+									{% endif %}
+
+									<div class="row">
+										<div class="col-md-6 mb-3">
+											<div
+												class="form-check p-3 border rounded {% if loop.index == 1 %}bg-light{% endif %}">
+												<input
+													class="form-check-input"
+													type="radio"
+													name="question_{{ question.id }}"
+													id="q{{ question.id }}_option1"
+													value="1" />
+												<label
+													class="form-check-label w-100"
+													for="q{{ question.id }}_option1">
+													<span class="fw-bold">A.</span> {{ question.option1 }}
+													{% if question.option1_image %}
+													<div>
+														<img
+															src="{{ url_for('static', filename='uploads/' + question.option1_image) }}"
+															alt="Option 1 Image"
+															class="img-fluid rounded mt-2"
+															style="max-width: 200px" />
+													</div>
+													{% endif %}
+												</label>
+											</div>
+										</div>
+
+										<div class="col-md-6 mb-3">
+											<div class="form-check p-3 border rounded">
+												<input
+													class="form-check-input"
+													type="radio"
+													name="question_{{ question.id }}"
+													id="q{{ question.id }}_option2"
+													value="2" />
+												<label
+													class="form-check-label w-100"
+													for="q{{ question.id }}_option2">
+													<span class="fw-bold">B.</span> {{ question.option2 }}
+													{% if question.option2_image %}
+													<div>
+														<img
+															src="{{ url_for('static', filename='uploads/' + question.option2_image) }}"
+															alt="Option 2 Image"
+															class="img-fluid rounded mt-2"
+															style="max-width: 200px" />
+													</div>
+													{% endif %}
+												</label>
+											</div>
+										</div>
+
+										<div class="col-md-6 mb-3">
+											<div class="form-check p-3 border rounded">
+												<input
+													class="form-check-input"
+													type="radio"
+													name="question_{{ question.id }}"
+													id="q{{ question.id }}_option3"
+													value="3" />
+												<label
+													class="form-check-label w-100"
+													for="q{{ question.id }}_option3">
+													<span class="fw-bold">C.</span> {{ question.option3 }}
+													{% if question.option3_image %}
+													<div>
+														<img
+															src="{{ url_for('static', filename='uploads/' + question.option3_image) }}"
+															alt="Option 3 Image"
+															class="img-fluid rounded mt-2"
+															style="max-width: 200px" />
+													</div>
+													{% endif %}
+												</label>
+											</div>
+										</div>
+
+										<div class="col-md-6 mb-3">
+											<div class="form-check p-3 border rounded">
+												<input
+													class="form-check-input"
+													type="radio"
+													name="question_{{ question.id }}"
+													id="q{{ question.id }}_option4"
+													value="4" />
+												<label
+													class="form-check-label w-100"
+													for="q{{ question.id }}_option4">
+													<span class="fw-bold">D.</span> {{ question.option4 }}
+													{% if question.option4_image %}
+													<div>
+														<img
+															src="{{ url_for('static', filename='uploads/' + question.option4_image) }}"
+															alt="Option 4 Image"
+															class="img-fluid rounded mt-2"
+															style="max-width: 200px" />
+													</div>
+													{% endif %}
+												</label>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						{% endfor %}
+
+						<div class="d-flex justify-content-between mt-4">
+							<button
+								type="button"
+								class="btn btn-secondary"
+								onclick="window.location='{{ url_for('user.user_dashboard') }}'">
+								Cancel Quiz
+							</button>
+							<button type="submit" class="btn btn-primary">Submit Quiz</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+	// Timer functionality
+	document.addEventListener('DOMContentLoaded', function() {
+	    var durationMinutes = {{ duration_minutes }};
+	    var totalSeconds = durationMinutes * 60;
+	    var minutesDisplay = document.getElementById('minutes');
+	    var secondsDisplay = document.getElementById('seconds');
+	    var timerElement = document.getElementById('timer');
+	    var quizForm = document.getElementById('quizForm');
+
+	    var timerInterval = setInterval(function() {
+	        totalSeconds--;
+
+	        if (totalSeconds <= 0) {
+	            clearInterval(timerInterval);
+	            alert('Time is up! Your quiz will be submitted automatically.');
+	            quizForm.submit();
+	            return;
+	        }
+
+	        var minutes = Math.floor(totalSeconds / 60);
+	        var seconds = totalSeconds % 60;
+
+	        // Warning colors when time is running out
+	        if (minutes < 5) {
+	            timerElement.classList.remove('bg-primary');
+	            timerElement.classList.add('bg-warning');
+	        }
+
+	        if (minutes < 2) {
+	            timerElement.classList.remove('bg-warning');
+	            timerElement.classList.add('bg-danger');
+	        }
+
+	        minutesDisplay.textContent = minutes.toString().padStart(2, '0');
+	        secondsDisplay.textContent = seconds.toString().padStart(2, '0');
+	    }, 1000);
+
+	    // Warning before leaving the page
+	    window.addEventListener('beforeunload', function(e) {
+	        if (totalSeconds > 0) {
+	            e.preventDefault();
+	            e.returnValue = 'You are in the middle of a quiz. Are you sure you want to leave this page?';
+	            return e.returnValue;
+	        }
+	    });
+	});
+</script>
+{% endblock %}
