@@ -1,0 +1,411 @@
+{% extends 'base.html' %} {% block title %}Quiz Results - {{ quiz.quiz_name }}{%
+endblock %} {% block head %} {{ super() }}
+<style>
+	.result-card {
+		transition: all 0.3s ease;
+	}
+	.result-card:hover {
+		transform: translateY(-5px);
+		box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+	}
+	.option-correct {
+		background-color: rgba(45, 206, 137, 0.15);
+		border: 1px solid #2dce89;
+	}
+	.option-incorrect {
+		background-color: rgba(245, 54, 92, 0.15);
+		border: 1px solid #f5365c;
+	}
+	.option-box {
+		padding: 10px 15px;
+		border-radius: 5px;
+		margin-bottom: 10px;
+	}
+	.question-section {
+		padding: 20px;
+		border-radius: 10px;
+		margin-bottom: 20px;
+		border: 1px solid #e9ecef;
+		background-color: #fff;
+	}
+	.explanation {
+		background-color: #f8f9fa;
+		border-left: 4px solid #5e72e4;
+		padding: 10px 15px;
+		margin-top: 15px;
+	}
+	.score-circle {
+		width: 150px;
+		height: 150px;
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin: 0 auto;
+	}
+	.score-circle h1 {
+		font-size: 3rem;
+		margin: 0;
+		color: white;
+	}
+	.score-detail {
+		text-align: center;
+		margin-top: 15px;
+	}
+	.quiz-stats {
+		margin-top: 15px;
+	}
+
+	.progress {
+		height: 8px;
+		margin-bottom: 10px;
+	}
+
+	.marker-correct {
+		color: #2dce89;
+	}
+	.marker-incorrect {
+		color: #f5365c;
+	}
+	.marker-default {
+		color: #adb5bd;
+	}
+
+	.summary-pills {
+		display: flex;
+		justify-content: center;
+		margin-bottom: 20px;
+	}
+
+	.summary-pill {
+		padding: 10px 20px;
+		border-radius: 30px;
+		margin: 0 10px;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		min-width: 100px;
+	}
+
+	.summary-pill .count {
+		font-size: 1.5rem;
+		font-weight: bold;
+	}
+
+	.summary-pill .label {
+		font-size: 0.8rem;
+		text-transform: uppercase;
+	}
+</style>
+{% endblock %} {% block content %}
+<div class="container-fluid py-4">
+	<div class="row">
+		<div class="col-lg-12 mb-4">
+			<div class="card">
+				<div class="card-header pb-0">
+					<div class="d-flex justify-content-between align-items-center">
+						<div>
+							<h5>Quiz Results</h5>
+							<p class="text-sm mb-0">
+								<span class="font-weight-bold">{{ quiz.quiz_name }}</span>
+							</p>
+						</div>
+						<div>
+							<a
+								href="{{ url_for('user.subject_quizzes', subject_id=quiz.subject_id) }}"
+								class="btn btn-outline-secondary btn-sm me-2">
+								<i class="fas fa-list me-1"></i> All Quizzes
+							</a>
+							<a
+								href="{{ url_for('user.quiz_take', quiz_id=quiz.id, retake=1) }}"
+								class="btn btn-outline-primary btn-sm">
+								<i class="fas fa-redo me-1"></i> Retake Quiz
+							</a>
+						</div>
+					</div>
+				</div>
+
+				<div class="card-body">
+					<!-- Result Summary -->
+					<div class="row mb-4">
+						<div class="col-md-4">
+							<div class="card result-card shadow-sm">
+								<div class="card-body text-center">
+									{% set percentage = (score.total_score /
+									(questions|sum(attribute='marks'))) * 100 if
+									questions|sum(attribute='marks') > 0 else 0 %} {% if
+									percentage >= 80 %} {% set color_class = "bg-gradient-success"
+									%} {% set emoji = "🏆" %} {% set message = "Excellent!" %} {%
+									elif percentage >= 60 %} {% set color_class =
+									"bg-gradient-info" %} {% set emoji = "👍" %} {% set message =
+									"Good job!" %} {% elif percentage >= 40 %} {% set color_class
+									= "bg-gradient-warning" %} {% set emoji = "🤔" %} {% set
+									message = "Not bad!" %} {% else %} {% set color_class =
+									"bg-gradient-danger" %} {% set emoji = "📚" %} {% set message
+									= "Keep studying!" %} {% endif %}
+
+									<div class="score-circle {{ color_class }}">
+										<h1>{{ score.total_score }}</h1>
+									</div>
+									<div class="score-detail">
+										<h4>{{ message }} {{ emoji }}</h4>
+										<p>{{ percentage|round(1) }}% score achieved</p>
+										<p class="text-sm text-muted">
+											Completed on {{ score.timestamp_of_attempt.strftime('%B
+											%d, %Y at %H:%M') }}
+										</p>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div class="col-md-8">
+							<div class="card result-card shadow-sm">
+								<div class="card-body">
+									<h5 class="mb-3">Performance Summary</h5>
+
+									<div class="summary-pills">
+										<div class="summary-pill bg-success bg-opacity-10">
+											<span class="count text-success"
+												>{{ score.correct_answers }}</span
+											>
+											<span class="label text-success">Correct</span>
+										</div>
+										<div class="summary-pill bg-danger bg-opacity-10">
+											<span class="count text-danger"
+												>{{ score.wrong_answers }}</span
+											>
+											<span class="label text-danger">Wrong</span>
+										</div>
+										<div class="summary-pill bg-warning bg-opacity-10">
+											<span class="count text-warning"
+												>{{ score.skipped }}</span
+											>
+											<span class="label text-warning">Skipped</span>
+										</div>
+										<div class="summary-pill bg-primary bg-opacity-10">
+											<span class="count text-primary"
+												>{{ questions|length }}</span
+											>
+											<span class="label text-primary">Total</span>
+										</div>
+									</div>
+
+									<div class="quiz-stats">
+										<div class="row">
+											<div class="col-md-6">
+												<div class="d-flex justify-content-between mb-1">
+													<span>Accuracy</span>
+													<span
+														>{{ ((score.correct_answers / questions|length) *
+														100)|round(1) if questions|length else 0 }}%</span
+													>
+												</div>
+												<div class="progress">
+													<div
+														class="progress-bar bg-info"
+														role="progressbar"
+														style="width: {{ ((score.correct_answers / questions|length) * 100) if questions|length else 0 }}%"></div>
+												</div>
+											</div>
+											<div class="col-md-6">
+												<div class="d-flex justify-content-between mb-1">
+													<span>Completion</span>
+													<span
+														>{{ (((questions|length - score.skipped) /
+														questions|length) * 100)|round(1) if
+														questions|length else 0 }}%</span
+													>
+												</div>
+												<div class="progress">
+													<div
+														class="progress-bar bg-primary"
+														role="progressbar"
+														style="width: {{ (((questions|length - score.skipped) / questions|length) * 100) if questions|length else 0 }}%"></div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- Detailed Results -->
+					<div class="card shadow-sm">
+						<div class="card-header pb-0">
+							<div class="d-flex justify-content-between align-items-center">
+								<h5 class="mb-0">Question Analysis</h5>
+								<button
+									class="btn btn-sm btn-outline-primary"
+									id="toggleAllBtn">
+									<i class="fas fa-expand-alt me-1"></i> Expand All
+								</button>
+							</div>
+						</div>
+						<div class="card-body">
+							<div class="accordion" id="questionsAccordion">
+								{% for question in questions %}
+								<div class="accordion-item">
+									<h2 class="accordion-header" id="heading{{ question.id }}">
+										<button
+											class="accordion-button collapsed"
+											type="button"
+											data-bs-toggle="collapse"
+											data-bs-target="#collapse{{ question.id }}"
+											aria-expanded="false"
+											aria-controls="collapse{{ question.id }}">
+											<div
+												class="d-flex justify-content-between w-100 align-items-center">
+												<div>
+													<span class="me-2">Question {{ loop.index }}</span>
+													{% if question.id in user_answers and
+													user_answers[question.id] == question.correct_options
+													%}
+													<span class="badge bg-success"
+														>+{{ question.marks }}</span
+													>
+													{% elif question.id in user_answers %}
+													<span class="badge bg-danger"
+														>-{{ question.negative_marks }}</span
+													>
+													{% else %}
+													<span class="badge bg-warning">Skipped</span>
+													{% endif %}
+												</div>
+												<div class="text-end d-flex align-items-center">
+													{% if question.id in user_answers and
+													user_answers[question.id] == question.correct_options
+													%}
+													<i class="fas fa-check-circle me-2 text-success"></i>
+													Correct {% elif question.id in user_answers %}
+													<i class="fas fa-times-circle me-2 text-danger"></i>
+													Incorrect {% else %}
+													<i class="fas fa-minus-circle me-2 text-warning"></i>
+													Not Answered {% endif %}
+												</div>
+											</div>
+										</button>
+									</h2>
+									<div
+										id="collapse{{ question.id }}"
+										class="accordion-collapse collapse"
+										aria-labelledby="heading{{ question.id }}"
+										data-bs-parent="#questionsAccordion">
+										<div class="accordion-body">
+											<p class="mb-3">
+												<strong>{{ question.question_statement }}</strong>
+											</p>
+
+											{% if question.question_image %}
+											<div class="text-center my-2">
+												<img
+													src="{{ url_for('static', filename='uploads/' + question.question_image) }}"
+													alt="Question Image"
+													class="img-fluid"
+													style="max-height: 200px" />
+											</div>
+											{% endif %}
+
+											<div class="options mt-3">
+												{% for option_num in range(1, 5) %} {% set option_field
+												= "option" ~ option_num %} {% set option_text =
+												question[option_field] %} {% set option_image_field =
+												"option" ~ option_num ~ "_image" %} {% set option_image
+												= question[option_image_field] %}
+
+												<div
+													class="option-box {% if option_num == question.correct_options %} option-correct {% elif question.id in user_answers and user_answers[question.id] == option_num %} option-incorrect {% endif %}">
+													<div class="d-flex align-items-center">
+														<div class="me-2">
+															{% if option_num == question.correct_options %}
+															<i class="fas fa-check-circle marker-correct"></i>
+															{% elif question.id in user_answers and
+															user_answers[question.id] == option_num %}
+															<i
+																class="fas fa-times-circle marker-incorrect"></i>
+															{% else %}
+															<span class="marker-default"
+																>{{ ["A", "B", "C", "D"][option_num-1] }}.</span
+															>
+															{% endif %}
+														</div>
+														<div>{{ option_text }}</div>
+
+														{% if option_num == question.correct_options %}
+														<div class="ms-auto">
+															<span class="badge bg-success"
+																>Correct Answer</span
+															>
+														</div>
+														{% elif question.id in user_answers and
+														user_answers[question.id] == option_num %}
+														<div class="ms-auto">
+															<span class="badge bg-danger">Your Answer</span>
+														</div>
+														{% endif %}
+													</div>
+
+													{% if option_image %}
+													<div class="text-center mt-2">
+														<img src="{{ url_for('static', filename='uploads/' +
+														option_image) }}" alt="Option {{ ["A", "B", "C",
+														"D"][option_num-1] }} Image" class="img-fluid"
+														style="max-height: 100px;">
+													</div>
+													{% endif %}
+												</div>
+												{% endfor %}
+											</div>
+
+											{% if question.explanation %}
+											<div class="explanation mt-3">
+												<h6>
+													<i class="fas fa-info-circle me-2"></i> Explanation:
+												</h6>
+												<p class="mb-0">{{ question.explanation }}</p>
+											</div>
+											{% endif %}
+										</div>
+									</div>
+								</div>
+								{% endfor %}
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %} {% block scripts %}
+<script>
+	document.addEventListener("DOMContentLoaded", function () {
+		// Toggle all questions expand/collapse
+		const toggleAllBtn = document.getElementById("toggleAllBtn");
+		const accordionItems = document.querySelectorAll(".accordion-collapse");
+		let isExpanded = false;
+
+		toggleAllBtn.addEventListener("click", function () {
+			isExpanded = !isExpanded;
+
+			accordionItems.forEach((item) => {
+				if (isExpanded) {
+					item.classList.add("show");
+				} else {
+					item.classList.remove("show");
+				}
+			});
+
+			// Update button text
+			if (isExpanded) {
+				toggleAllBtn.innerHTML =
+					'<i class="fas fa-compress-alt me-1"></i> Collapse All';
+			} else {
+				toggleAllBtn.innerHTML =
+					'<i class="fas fa-expand-alt me-1"></i> Expand All';
+			}
+		});
+	});
+</script>
+{% endblock %}
