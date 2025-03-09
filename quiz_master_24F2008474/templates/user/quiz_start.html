@@ -1,0 +1,80 @@
+{% extends 'base.html' %} {% block title %}Start Quiz: {{ quiz.quiz_name }}{%
+endblock %} {% block content %}
+<div class="container-fluid py-4">
+	<div class="row">
+		<div class="col-lg-8 mx-auto">
+			<div class="card">
+				<div class="card-header pb-0">
+					<div class="d-flex justify-content-between align-items-center">
+						<div>
+							<h5>{{ quiz.quiz_name }}</h5>
+							<p class="text-sm mb-0">
+								<span class="font-weight-bold">Ready to start?</span>
+							</p>
+						</div>
+						<a
+							href="{{ url_for('user.subject_quizzes', subject_id=quiz.subject_id) }}"
+							class="btn btn-outline-secondary btn-sm">
+							<i class="fas fa-arrow-left me-2"></i> Back to Quizzes
+						</a>
+					</div>
+				</div>
+
+				<div class="card-body">
+					<div class="row">
+						<div class="col-md-6">
+							<h6>Quiz Details</h6>
+							<ul class="list-group list-group-flush">
+								<li class="list-group-item d-flex justify-content-between">
+									<span>Subject:</span>
+									<span class="text-primary">{{ quiz.subject.name }}</span>
+								</li>
+								<li class="list-group-item d-flex justify-content-between">
+									<span>Time Duration:</span>
+									<span class="text-primary">{{ quiz.time_duration }}</span>
+								</li>
+								<li class="list-group-item d-flex justify-content-between">
+									<span>Total Questions:</span>
+									<span class="text-primary">{{ question_count }}</span>
+								</li>
+							</ul>
+						</div>
+						<div class="col-md-6">
+							<h6>Quiz Description</h6>
+							<p>{{ quiz.quiz_description }}</p>
+						</div>
+					</div>
+
+					<div class="alert alert-warning mt-4">
+						<h6 class="alert-heading">Important Instructions:</h6>
+						<ul>
+							<li>
+								This quiz contains {{ question_count }} multiple choice
+								questions
+							</li>
+							<li>You have {{ quiz.time_duration }} to complete the quiz</li>
+							<li>Each question has only one correct answer</li>
+							<li>
+								Questions may have positive marks for correct answers and
+								negative marks for wrong ones
+							</li>
+							<li>The timer will start as soon as you begin the quiz</li>
+							<li>
+								Do not refresh or navigate away from the page during the quiz
+							</li>
+						</ul>
+					</div>
+
+					<div class="text-center mt-4">
+						<a
+							href="{{ url_for('user.quiz_take', quiz_id=quiz.id) }}"
+							class="btn btn-lg bg-gradient-success">
+							<i class="fas fa-play-circle me-2"></i> Start Quiz Now
+						</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
