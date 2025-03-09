@@ -1,0 +1,174 @@
+{% extends 'base.html' %} {% block title %}Quiz Results{% endblock %} {% block
+content %}
+<div class="container-fluid py-4">
+	<div class="row">
+		<div class="col-lg-12 mb-4">
+			<div class="card">
+				<div class="card-header pb-0">
+					<div class="d-flex justify-content-between align-items-center">
+						<div>
+							<h5>Quiz Results</h5>
+							<p class="text-sm mb-0">
+								<span class="font-weight-bold">{{ quiz.quiz_name }}</span>
+							</p>
+						</div>
+						<div>
+							<a
+								href="{{ url_for('user.subject_quizzes', subject_id=quiz.subject_id) }}"
+								class="btn btn-outline-secondary btn-sm me-2">
+								<i class="fas fa-list me-1"></i> All Quizzes
+							</a>
+							<a
+								href="{{ url_for('user.quiz_take', quiz_id=quiz.id) }}"
+								class="btn btn-outline-primary btn-sm">
+								<i class="fas fa-redo me-1"></i> Retake Quiz
+							</a>
+						</div>
+					</div>
+				</div>
+
+				<div class="card-body">
+					<!-- Summary Card -->
+					<div class="row mb-4">
+						<div class="col-md-4">
+							<div
+								class="card card-background shadow-none card-background-mask-primary">
+								<div
+									class="full-background"
+									style="background-color: #67b3e8"></div>
+								<div class="card-body text-center">
+									<h1 class="text-white mb-0">{{ score.total_score }}</h1>
+									<h5 class="text-white">Your Score</h5>
+									<p class="text-white text-sm">
+										Completed on {{ score.timestamp_of_attempt.strftime('%B %d,
+										%Y at %H:%M') }}
+									</p>
+								</div>
+							</div>
+						</div>
+						<div class="col-md-8">
+							<div class="card shadow-none">
+								<div class="card-body">
+									<div class="row">
+										<div class="col-md-4 text-center">
+											<h3 class="text-success">{{ score.correct_answers }}</h3>
+											<p class="text-sm mb-0">Correct Answers</p>
+										</div>
+										<div class="col-md-4 text-center">
+											<h3 class="text-danger">{{ score.wrong_answers }}</h3>
+											<p class="text-sm mb-0">Wrong Answers</p>
+										</div>
+										<div class="col-md-4 text-center">
+											<h3 class="text-warning">{{ score.skipped }}</h3>
+											<p class="text-sm mb-0">Skipped Questions</p>
+										</div>
+									</div>
+									<div class="progress-wrapper mt-4">
+										{% set total_questions = score.correct_answers +
+										score.wrong_answers + score.skipped %} {% set
+										correct_percentage = (score.correct_answers /
+										total_questions * 100) if total_questions > 0 else 0 %} {%
+										set wrong_percentage = (score.wrong_answers /
+										total_questions * 100) if total_questions > 0 else 0 %} {%
+										set skipped_percentage = (score.skipped / total_questions *
+										100) if total_questions > 0 else 0 %}
+
+										<div class="progress-info mb-2">
+											<div class="progress-percentage">
+												<span class="text-sm font-weight-bold"
+													>Performance Summary</span
+												>
+											</div>
+										</div>
+										<div class="progress">
+											<div
+												class="progress-bar bg-success"
+												role="progressbar"
+												style="width: {{ correct_percentage }}%"></div>
+											<div
+												class="progress-bar bg-danger"
+												role="progressbar"
+												style="width: {{ wrong_percentage }}%"></div>
+											<div
+												class="progress-bar bg-warning"
+												role="progressbar"
+												style="width: {{ skipped_percentage }}%"></div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- Detailed Results -->
+					<div class="card shadow-sm">
+						<div class="card-header pb-0">
+							<h6>Detailed Question Analysis</h6>
+						</div>
+						<div class="card-body">
+							{% for question in questions %}
+							<div
+								class="question-result mb-4 {% if loop.index != questions|length %}border-bottom pb-4{% endif %}">
+								<div class="d-flex justify-content-between">
+									<h6>Question {{ loop.index }}</h6>
+									<div>
+										{% if question.id in user_answers and
+										user_answers[question.id] == question.correct_options %}
+										<span class="badge bg-success">Correct</span>
+										{% elif question.id in user_answers %}
+										<span class="badge bg-danger">Incorrect</span>
+										{% else %}
+										<span class="badge bg-warning">Skipped</span>
+										{% endif %}
+									</div>
+								</div>
+
+								<p>{{ question.question_text }}</p>
+
+								<div class="options">
+									{% for option in [1, 2, 3, 4] %} {% set option_field =
+									"option_" ~ option %} {% set option_text =
+									question[option_field] %}
+
+									<div class="option mb-2">
+										<div
+											class="option-result p-2 rounded {% if option == question.correct_options %} bg-success bg-opacity-25 {% elif question.id in user_answers and user_answers[question.id] == option %} bg-danger bg-opacity-25 {% endif %}">
+											<div class="d-flex align-items-center">
+												<div class="option-marker me-2">
+													{{ ["A", "B", "C", "D"][option-1] }}.
+												</div>
+												<div>{{ option_text }}</div>
+												{% if option == question.correct_options %}
+												<div class="ms-auto">
+													<i class="fas fa-check text-success"></i>
+												</div>
+												{% elif question.id in user_answers and
+												user_answers[question.id] == option %}
+												<div class="ms-auto">
+													<i class="fas fa-times text-danger"></i>
+												</div>
+												{% endif %}
+											</div>
+										</div>
+									</div>
+									{% endfor %}
+								</div>
+
+								{% if question.explanation %}
+								<div class="explanation mt-3">
+									<div class="alert alert-info mb-0">
+										<h6 class="alert-heading">Explanation:</h6>
+										<p class="mb-0">{{ question.explanation }}</p>
+									</div>
+								</div>
+								{% endif %}
+							</div>
+							{% endfor %}
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
