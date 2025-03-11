@@ -9,6 +9,7 @@ dependencies = [
     "flask-login>=0.6.3",
     "flask-migrate>=4.1.0",
     "flask-sqlalchemy>=3.1.1",
+    "matplotlib>=3.10.1",
     "sqlalchemy>=2.0.38",
     "werkzeug>=3.1.3",
 ]
