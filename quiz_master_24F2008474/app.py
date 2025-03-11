@@ -28,10 +28,12 @@ def create_app():
     from routes.auth import auth_bp
     from routes.user import user_bp
     from routes.admin import admin_bp
+    from routes.api import api_bp
 
     app.register_blueprint(auth_bp, url_prefix="/")
     app.register_blueprint(user_bp, url_prefix="/user")
     app.register_blueprint(admin_bp, url_prefix="/admin")
+    app.register_blueprint(api_bp, url_prefix="/api")
 
     @login_manager.user_loader
     def load_user(user_id):
