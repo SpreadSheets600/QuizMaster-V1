@@ -2,13 +2,24 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 from sqlalchemy import func
+
 from datetime import datetime
+import logging
+import sys
 import os
 
 from models.database import db
 from models.models import QuizAttempt, Question, Subject, Chapter, Quiz, User, Score
 
 admin_bp = Blueprint("admin", __name__)
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[logging.FileHandler("app.log"), logging.StreamHandler(sys.stdout)],
+)
+
+logger = logging.getLogger(__name__)
 
 
 @admin_bp.route("/dashboard")
@@ -31,6 +42,47 @@ def admin_dashboard():
         question=question,
         quiz=quiz,
         users=users,
+    )
+
+
+# ---------------------------------------------------------------------------- #
+#                                 SEARCH ROUTES                                #
+# ---------------------------------------------------------------------------- #
+
+
+@admin_bp.route("/search")
+@login_required
+def search_quizzes():
+    if current_user.role != "admin":
+        flash("Access Denied", "error")
+        return redirect(url_for("auth.login"))
+
+    search_term = request.args.get("q", "")
+
+    if not search_term or len(search_term) < 3:
+        flash("Please enter at least 3 characters to search", "warning")
+        return redirect(url_for("user.user_dashboard"))
+
+    quiz_results = Quiz.query.filter(Quiz.quiz_name.ilike(f"%{search_term}%")).all()
+    subject_results = Subject.query.filter(Subject.name.ilike(f"%{search_term}%")).all()
+    chapter_results = Chapter.query.filter(Chapter.name.ilike(f"%{search_term}%")).all()
+
+    user_attempts = {}
+    for quiz in quiz_results:
+        attempt = Score.query.filter_by(
+            quiz_id=quiz.id, user_id=current_user.id
+        ).first()
+        if attempt:
+            user_attempts[quiz.id] = attempt
+
+    return render_template(
+        "search_results.html",
+        search_term=search_term,
+        quiz_results=quiz_results,
+        subject_results=subject_results,
+        chapter_results=chapter_results,
+        user_attempts=user_attempts,
+        Subject=Subject,
     )
 
 
@@ -253,16 +305,22 @@ def chapter_delete(chapter_id):
 # ---------------------------------------------------------------------------- #
 #                                  QUIZ ROUTES                                 #
 # ---------------------------------------------------------------------------- #
+
+
 @admin_bp.route("/quizzes")
 @login_required
 def quizzes_list():
     if current_user.role != "admin":
+        logger.warning(
+            f"Unauthorized access attempt to quizzes list by user {current_user.username}"
+        )
         flash("Access Denied", "error")
         return redirect(url_for("auth.login"))
 
-    subject_id = request.args.get("subject_id", "")
-    chapter_id = request.args.get("chapter_id", "")
+    subject_id = request.args.get("subject_id", type=int)
+    chapter_id = request.args.get("chapter_id", type=int)
     quiz_date = request.args.get("quiz_date", "")
+    search_term = request.args.get("search", "")
 
     query = Quiz.query
 
@@ -277,15 +335,21 @@ def quizzes_list():
             date_obj = datetime.strptime(quiz_date, "%Y-%m-%d").date()
             query = query.filter(func.date(Quiz.date_of_quiz) == date_obj)
         except ValueError:
-            pass
+            logger.warning(f"Invalid date format in quiz filter: {quiz_date}")
+
+    if search_term:
+        query = query.filter(Quiz.quiz_name.ilike(f"%{search_term}%"))
 
     quizzes = query.order_by(Quiz.date_of_quiz.desc()).all()
-
     subjects = Subject.query.all()
 
     filtered_chapters = []
     if subject_id:
         filtered_chapters = Chapter.query.filter_by(subject_id=subject_id).all()
+
+    logger.info(
+        f"Quizzes list filtered - subject: {subject_id}, chapter: {chapter_id}, date: {quiz_date}"
+    )
 
     return render_template(
         "admin/quiz_list.html",
@@ -295,6 +359,7 @@ def quizzes_list():
         subject_id=subject_id,
         chapter_id=chapter_id,
         quiz_date=quiz_date,
+        search=search_term,
     )
 
 
@@ -380,8 +445,8 @@ def quiz_edit(quiz_id):
         return redirect(url_for("auth.login"))
 
     quiz = Quiz.query.get_or_404(quiz_id)
-    chapters = Chapter.query.get_or_404(quiz.chapter_id)
-    subjects = Subject.query.get_or_404(quiz.subject_id)
+    subjects = Subject.query.all()
+    filtered_chapters = Chapter.query.filter_by(subject_id=quiz.subject_id).all()
 
     if request.method == "POST":
         name = request.form.get("quiz_name")
@@ -392,13 +457,19 @@ def quiz_edit(quiz_id):
         if not name:
             flash("Please Enter The Quiz Name", "error")
             return render_template(
-                "admin/quiz_form.html", quiz=quiz, subjects=subjects, chapters=chapters
+                "admin/quiz_form.html",
+                quiz=quiz,
+                subjects=subjects,
+                chapters=filtered_chapters,
             )
 
         if not date_of_quiz or not time_duration:
             flash("Date And Time Duration Are Required", "error")
             return render_template(
-                "admin/quiz_form.html", quiz=quiz, subjects=subjects, chapters=chapters
+                "admin/quiz_form.html",
+                quiz=quiz,
+                subjects=subjects,
+                chapters=filtered_chapters,
             )
 
         try:
@@ -406,13 +477,19 @@ def quiz_edit(quiz_id):
         except ValueError:
             flash("Invalid Date Format", "error")
             return render_template(
-                "admin/quiz_form.html", quiz=quiz, subjects=subjects, chapters=chapters
+                "admin/quiz_form.html",
+                quiz=quiz,
+                subjects=subjects,
+                chapters=filtered_chapters,
             )
 
         if not time_duration or len(time_duration) != 5 or time_duration[2] != ":":
             flash("Time Duration Must Be In HH:MM Format", "error")
             return render_template(
-                "admin/quiz_form.html", quiz=quiz, subjects=subjects, chapters=chapters
+                "admin/quiz_form.html",
+                quiz=quiz,
+                subjects=subjects,
+                chapters=filtered_chapters,
             )
 
         quiz.quiz_name = name
@@ -425,7 +502,7 @@ def quiz_edit(quiz_id):
         return redirect(url_for("admin.quizzes_list"))
 
     return render_template(
-        "admin/quiz_form.html", quiz=quiz, subjects=subjects, chapters=chapters
+        "admin/quiz_form.html", quiz=quiz, subjects=subjects, chapters=filtered_chapters
     )
 
 
@@ -434,6 +511,7 @@ def quiz_edit(quiz_id):
 def quiz_delete(quiz_id):
     if current_user.role != "admin":
         flash("Access Denied", "error")
+        return redirect(url_for("auth.login"))
 
     quiz = Quiz.query.get_or_404(quiz_id)
 
@@ -785,7 +863,6 @@ def user_delete(user_id):
         flash("Access Denied", "error")
         return redirect(url_for("auth.login"))
 
-    # Don't allow deleting yourself
     if current_user.id == user_id:
         flash("You cannot delete your own account", "error")
         return redirect(url_for("admin.users_list"))
@@ -851,14 +928,166 @@ def user_demote(user_id):
 # ---------------------------------------------------------------------------- #
 
 
-@admin_bp.route("/statistics")  # Work With Quiz Attempt
+@admin_bp.route("/statistics")
 @login_required
 def statistics():
     if current_user.role != "admin":
         flash("Access Denied", "error")
         return redirect(url_for("auth.login"))
 
-    if request.method == "POST":
-        quiz_attempt = QuizAttempt.query.all()
+    total_users = User.query.filter_by(role="user").count()
+    total_admins = User.query.filter_by(role="admin").count()
+    total_subjects = Subject.query.count()
+    total_quizzes = Quiz.query.count()
+    total_questions = Question.query.count()
+    total_attempts = Score.query.count()
 
-    return render_template("admin/statistics.html", quiz_attempt=quiz_attempt)
+    active_users = db.session.query(Score.user_id).distinct().count()
+
+    popular_subjects = (
+        db.session.query(
+            Subject.id, Subject.name, func.count(Score.id).label("attempts")
+        )
+        .join(Quiz, Quiz.subject_id == Subject.id)
+        .join(Score, Score.quiz_id == Quiz.id)
+        .group_by(Subject.id, Subject.name)
+        .order_by(func.count(Score.id).desc())
+        .limit(5)
+        .all()
+    )
+
+    top_users = (
+        db.session.query(
+            User.id,
+            User.username,
+            User.full_name,
+            func.avg(Score.total_score).label("avg_score"),
+            func.count(Score.id).label("attempts"),
+        )
+        .join(Score, Score.user_id == User.id)
+        .group_by(User.id, User.username, User.full_name)
+        .order_by(func.avg(Score.total_score).desc())
+        .limit(10)
+        .all()
+    )
+
+    recent_attempts = (
+        db.session.query(
+            Score.id,
+            Score.total_score,
+            Score.timestamp_of_attempt,
+            User.username,
+            User.full_name,
+            Quiz.quiz_name,
+            Subject.name.label("subject_name"),
+        )
+        .join(User, User.id == Score.user_id)
+        .join(Quiz, Quiz.id == Score.quiz_id)
+        .join(Subject, Subject.id == Quiz.subject_id)
+        .order_by(Score.timestamp_of_attempt.desc())
+        .limit(10)
+        .all()
+    )
+
+    current_year = datetime.now().year
+    monthly_data = []
+
+    for month in range(1, 13):
+        month_start = datetime(current_year, month, 1)
+        if month == 12:
+            month_end = datetime(current_year + 1, 1, 1)
+        else:
+            month_end = datetime(current_year, month + 1, 1)
+
+        count = Score.query.filter(
+            Score.timestamp_of_attempt >= month_start,
+            Score.timestamp_of_attempt < month_end,
+        ).count()
+
+        monthly_data.append({"month": month_start.strftime("%b"), "count": count})
+
+    subject_scores = (
+        db.session.query(Subject.name, func.avg(Score.total_score).label("avg_score"))
+        .join(Quiz, Quiz.subject_id == Subject.id)
+        .join(Score, Score.quiz_id == Quiz.id)
+        .group_by(Subject.name)
+        .all()
+    )
+
+    import io
+    import base64
+    from matplotlib.figure import Figure
+
+    fig1 = Figure(figsize=(10, 4), dpi=100)
+    ax1 = fig1.add_subplot(111)
+    months = [data["month"] for data in monthly_data]
+    counts = [data["count"] for data in monthly_data]
+    ax1.bar(months, counts, color="#5e72e4")
+    ax1.set_title("Quiz Attempts by Month")
+    ax1.set_ylabel("Number of Attempts")
+
+    for i, count in enumerate(counts):
+        ax1.annotate(str(count), xy=(i, count), ha="center", va="bottom")
+
+    fig1.tight_layout()
+    buf1 = io.BytesIO()
+    fig1.savefig(buf1, format="png")
+    buf1.seek(0)
+    monthly_chart = base64.b64encode(buf1.getbuffer()).decode("ascii")
+
+    if subject_scores:
+        fig2 = Figure(figsize=(10, 4), dpi=100)
+        ax2 = fig2.add_subplot(111)
+        subjects = [score[0] for score in subject_scores]
+        avg_scores = [round(float(score[1]), 1) for score in subject_scores]
+
+        bars = ax2.bar(subjects, avg_scores, color="#2dce89")
+        ax2.set_title("Average Scores by Subject")
+        ax2.set_ylabel("Average Score")
+        ax2.set_ylim(0, 100)
+        ax2.set_xticklabels(subjects, rotation=45, ha="right")
+
+        for bar in bars:
+            height = bar.get_height()
+            ax2.annotate(
+                f"{height}",
+                xy=(bar.get_x() + bar.get_width() / 2, height),
+                xytext=(0, 3),
+                textcoords="offset points",
+                ha="center",
+                va="bottom",
+            )
+
+        fig2.tight_layout()
+        buf2 = io.BytesIO()
+        fig2.savefig(buf2, format="png")
+        buf2.seek(0)
+        subject_chart = base64.b64encode(buf2.getbuffer()).decode("ascii")
+    else:
+        subject_chart = None
+
+    return render_template(
+        "admin/statistics.html",
+        total_users=total_users,
+        total_admins=total_admins,
+        total_subjects=total_subjects,
+        total_quizzes=total_quizzes,
+        total_questions=total_questions,
+        total_attempts=total_attempts,
+        active_users=active_users,
+        popular_subjects=popular_subjects,
+        top_users=top_users,
+        recent_attempts=recent_attempts,
+        monthly_chart=monthly_chart,
+        subject_chart=subject_chart,
+    )
+
+
+# ---------------------------------------------------------------------------- #
+#                                  API ROUTES                                  #
+# ---------------------------------------------------------------------------- #
+
+
+@admin_bp.route("/api")
+def api_docs():
+    return render_template("api.html")

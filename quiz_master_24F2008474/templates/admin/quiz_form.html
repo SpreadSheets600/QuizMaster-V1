@@ -12,6 +12,16 @@
         </p>
         {% endif %}
     </div>
+    <div class="ms-auto d-flex gap-2">
+      <form action="{{ url_for('admin.search_quizzes') }}" method="GET">
+        <div class="input-group">
+          <input type="text" name="q" class="form-control" placeholder="Search subjects or quizzes..." minlength="3" required />
+          <button class="btn btn-primary" type="submit">
+            <i class="fas fa-search"></i>
+          </button>
+        </div>
+      </form>
+    </div>
 </div>
 
 <!-- Flash Messages -->
