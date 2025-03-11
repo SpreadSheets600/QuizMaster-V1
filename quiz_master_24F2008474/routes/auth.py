@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 
+
 from models.models import User
 from models.database import db
 
@@ -15,7 +16,7 @@ def index():
             return redirect(url_for("admin.admin_dashboard"))
         return redirect(url_for("user.user_dashboard"))
 
-    return redirect(url_for("auth.login"))
+    return render_template("index.html")
 
 
 @auth_bp.route("/login", methods=["GET", "POST"])

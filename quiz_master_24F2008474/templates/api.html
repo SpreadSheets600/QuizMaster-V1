@@ -1,0 +1,198 @@
+{% extends "base.html" %} {% block title %}API Documentation{% endblock %} {% block content %}
+<div class="container mt-4">
+	<h1>Quiz Master API Documentation</h1>
+	<p class="lead">This documentation describes the available REST API endpoints for the Quiz Master application.</p>
+
+	<div class="card mb-4">
+		<div class="card-header bg-primary text-white">
+			<h2 class="h4 mb-0">API Overview</h2>
+		</div>
+		<div class="card-body">
+			<p>The Quiz Master API allows you to programmatically access quiz data including subjects, chapters, quizzes, scores, and questions. All endpoints return JSON responses.</p>
+			<p>Some endpoints may require authentication or specific roles (admin) to access.</p>
+		</div>
+	</div>
+
+	<!-- Subjects Endpoints -->
+	<div class="card mb-4">
+		<div class="card-header bg-success text-white">
+			<h3 class="h5 mb-0">Subjects</h3>
+		</div>
+		<div class="card-body">
+			<h4>Get All Subjects</h4>
+			<div class="mb-3">
+				<code class="d-block mb-2">GET /api/subjects</code>
+				<p>Returns a list of all available subjects.</p>
+
+				<strong>Response Format:</strong>
+				<pre class="bg-light p-3 mt-2"><code>{
+  "success": true,
+  "subjects": [
+    {
+      "id": 1,
+      "name": "Subject Name",
+      "description": "Subject Description"
+    },
+    ...
+  ]
+}</code></pre>
+			</div>
+
+			<h4>Get Subject by ID</h4>
+			<div class="mb-3">
+				<code class="d-block mb-2">GET /api/subjects/{subject_id}</code>
+				<p>Returns details for a specific subject.</p>
+				<strong>Parameters:</strong>
+				<ul>
+					<li><code>subject_id</code> (path parameter) - ID of the subject</li>
+				</ul>
+				<strong>Response Format:</strong>
+				<pre class="bg-light p-3 mt-2"><code>{
+  "success": true,
+  "subject": {
+    "id": 1,
+    "name": "Subject Name",
+    "description": "Subject Description" 
+  }
+}</code></pre>
+			</div>
+		</div>
+	</div>
+
+	<!-- Chapters Endpoints -->
+	<div class="card mb-4">
+		<div class="card-header bg-info text-white">
+			<h3 class="h5 mb-0">Chapters</h3>
+		</div>
+		<div class="card-body">
+			<h4>Get Chapters</h4>
+			<div class="mb-3">
+				<code class="d-block mb-2">GET /api/chapters</code>
+				<p>Returns a list of chapters, optionally filtered by subject.</p>
+				<strong>Query Parameters:</strong>
+				<ul>
+					<li><code>subject_id</code> (optional) - Filter chapters by subject ID</li>
+				</ul>
+				<strong>Response Format:</strong>
+				<pre class="bg-light p-3 mt-2"><code>{
+  "success": true,
+  "chapters": [
+    {
+      "id": 1,
+      "name": "Chapter Name",
+      "description": "Chapter Description",
+      "subject_id": 1
+    },
+    ...
+  ]
+}</code></pre>
+			</div>
+		</div>
+	</div>
+
+	<!-- Quizzes Endpoints -->
+	<div class="card mb-4">
+		<div class="card-header bg-warning text-dark">
+			<h3 class="h5 mb-0">Quizzes</h3>
+		</div>
+		<div class="card-body">
+			<h4>Get Quizzes</h4>
+			<div class="mb-3">
+				<code class="d-block mb-2">GET /api/quizzes</code>
+				<p>Returns a list of quizzes, optionally filtered by subject and/or chapter.</p>
+				<strong>Query Parameters:</strong>
+				<ul>
+					<li><code>subject_id</code> (optional) - Filter quizzes by subject ID</li>
+					<li><code>chapter_id</code> (optional) - Filter quizzes by chapter ID</li>
+				</ul>
+				<strong>Response Format:</strong>
+				<pre class="bg-light p-3 mt-2"><code>{
+  "success": true,
+  "quizzes": [
+    {
+      "id": 1,
+      "name": "Quiz Name",
+      "subject_id": 1,
+      "chapter_id": 1,
+      "date": "2023-03-15",
+      "time_duration": 30,
+      "description": "Quiz description"
+    },
+    ...
+  ]
+}</code></pre>
+			</div>
+		</div>
+	</div>
+
+	<!-- Scores Endpoints -->
+	<div class="card mb-4">
+		<div class="card-header bg-danger text-white">
+			<h3 class="h5 mb-0">Scores</h3>
+		</div>
+		<div class="card-body">
+			<h4>Get Scores</h4>
+			<div class="mb-3">
+				<code class="d-block mb-2">GET /api/scores</code>
+				<p>Returns a list of scores, filtered based on user role and optional parameters.</p>
+				<p><strong>Note:</strong> Regular users can only access their own scores. Admins can access all scores.</p>
+				<strong>Query Parameters:</strong>
+				<ul>
+					<li><code>quiz_id</code> (optional) - Filter scores by quiz ID</li>
+					<li><code>user_id</code> (optional, admin only) - Filter scores by user ID</li>
+				</ul>
+				<strong>Response Format:</strong>
+				<pre class="bg-light p-3 mt-2"><code>{
+  "success": true,
+  "scores": [
+    {
+      "id": 1,
+      "user_id": 1,
+      "quiz_id": 1,
+      "correct_answers": 8,
+      "wrong_answers": 2,
+      "skipped": 0,
+      "total_score": 16,
+      "timestamp": "2023-03-15 14:30:00"
+    },
+    ...
+  ]
+}</code></pre>
+			</div>
+		</div>
+	</div>
+
+	<!-- Using the API -->
+	<div class="card mb-4">
+		<div class="card-header bg-dark text-white">
+			<h3 class="h5 mb-0">Using the API</h3>
+		</div>
+		<div class="card-body">
+			<h4>Example Usage</h4>
+			<p>Here's an example of how to call the API using JavaScript:</p>
+			<pre class="bg-light p-3 mt-2"><code>// Example: Fetch all subjects
+fetch('/api/subjects')
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      console.log('Subjects:', data.subjects);
+      // Process the data
+    } else {
+      console.error('Error:', data.message);
+    }
+  })
+  .catch(error => console.error('API Error:', error));</code></pre>
+
+			<h4>Error Handling</h4>
+			<p>The API returns appropriate HTTP status codes along with JSON responses:</p>
+			<ul>
+				<li><strong>200 OK</strong> - Request succeeded</li>
+				<li><strong>400 Bad Request</strong> - Missing required parameters</li>
+				<li><strong>403 Forbidden</strong> - Insufficient permissions</li>
+				<li><strong>404 Not Found</strong> - Resource not found</li>
+				<li><strong>500 Internal Server Error</strong> - Server-side error</li>
+			</ul>
+		</div>
+	</div>
+</div>
+{% endblock %}
