@@ -1,0 +1,316 @@
+{% extends 'base.html' %} {% block title %}Search Results | Quiz Master{% endblock %} {% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-2">
+	<div>
+		<h2 class="mb-0">Search Results</h2>
+		<p class="text-muted mb-0">Results for "{{ search_term }}"</p>
+	</div>
+	<div>
+		<form action="{{ url_for('user.search_quizzes') }}" method="GET" class="d-flex gap-2">
+			<div class="input-group">
+				<input type="text" name="q" class="form-control" placeholder="Search..." value="{{ search_term }}" required minlength="3" />
+				<button class="btn btn-primary" type="submit"><i class="fas fa-search me-1"></i> Search</button>
+			</div>
+		</form>
+	</div>
+</div>
+
+<!-- Flash Messages -->
+{% with messages = get_flashed_messages(with_categories=true) %} {% if messages %} {% for category, message in messages %}
+<div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show">
+	{{ message }}
+	<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endfor %} {% endif %} {% endwith %}
+
+<div class="row">
+	<div class="col-12">
+		<!-- Search summary -->
+		<div class="card shadow-sm mb-4">
+			<div class="card-body">
+				<div class="d-flex justify-content-between align-items-center mb-3">
+					<div>
+						<i class="fas fa-search text-primary me-2"></i>
+						<span>Found <strong>{{ subject_results|length + chapter_results|length + quiz_results|length }}</strong> results</span>
+					</div>
+					<a href="{{ url_for('user.user_dashboard') }}" class="btn btn-sm btn-outline-secondary"> <i class="fas fa-home me-1"></i> Back to Dashboard </a>
+				</div>
+
+				<div class="d-flex flex-wrap gap-2">
+					{% if subject_results|length > 0 %}
+					<div class="badge bg-primary text-white p-2"><i class="fas fa-book me-1"></i> {{ subject_results|length }} Subjects</div>
+					{% endif %} {% if chapter_results|length > 0 %}
+					<div class="badge bg-info text-white p-2"><i class="fas fa-list-alt me-1"></i> {{ chapter_results|length }} Chapters</div>
+					{% endif %} {% if quiz_results|length > 0 %}
+					<div class="badge bg-success text-white p-2"><i class="fas fa-file-alt me-1"></i> {{ quiz_results|length }} Quizzes</div>
+					{% endif %}
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Subjects Section -->
+{% if subject_results|length > 0 %}
+<div class="row mb-4">
+	<div class="col-12">
+		<div class="card shadow-sm">
+			<div class="card-header bg-white">
+				<div class="d-flex align-items-center">
+					<div class="icon-shape bg-gradient-primary shadow text-white text-center rounded-circle me-3">
+						<i class="fas fa-book"></i>
+					</div>
+					<h5 class="mb-0">Subjects ({{ subject_results|length }})</h5>
+				</div>
+			</div>
+			<div class="card-body p-0">
+				<div class="table-responsive">
+					<table class="table table-hover mb-0">
+						<thead class="table-light">
+							<tr>
+								<th>Subject Name</th>
+								<th>Description</th>
+								<th class="text-end">Action</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for subject in subject_results %}
+							<tr>
+								<td>
+									<div class="d-flex align-items-center">
+										<div class="icon-shape bg-gradient-primary shadow-sm text-white text-center rounded-circle me-2" style="width: 30px; height: 30px">
+											<i class="fas fa-book"></i>
+										</div>
+										<span class="fw-semibold">{{ subject.name }}</span>
+									</div>
+								</td>
+								<td>
+									<p class="text-muted mb-0 small">{% if subject.description %} {{ subject.description|truncate(100) }} {% else %} No description available {% endif %}</p>
+								</td>
+								<td class="text-end">
+									<a href="{{ url_for('user.subject_quizzes', subject_id=subject.id) }}" class="btn btn-sm btn-primary"> <i class="fas fa-chevron-right me-1"></i> View Quizzes </a>
+								</td>
+							</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endif %}
+
+<!-- Chapters Section -->
+{% if chapter_results|length > 0 %}
+<div class="row mb-4">
+	<div class="col-12">
+		<div class="card shadow-sm">
+			<div class="card-header bg-white">
+				<div class="d-flex align-items-center">
+					<div class="icon-shape bg-gradient-info shadow text-white text-center rounded-circle me-3">
+						<i class="fas fa-list-alt"></i>
+					</div>
+					<h5 class="mb-0">Chapters ({{ chapter_results|length }})</h5>
+				</div>
+			</div>
+			<div class="card-body p-0">
+				<div class="table-responsive">
+					<table class="table table-hover mb-0">
+						<thead class="table-light">
+							<tr>
+								<th>Chapter Name</th>
+								<th>Subject</th>
+								<th class="text-end">Action</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for chapter in chapter_results %}
+							<tr>
+								<td>
+									<div class="d-flex align-items-center">
+										<div class="icon-shape bg-gradient-info shadow-sm text-white text-center rounded-circle me-2" style="width: 30px; height: 30px">
+											<i class="fas fa-list-alt"></i>
+										</div>
+										<span class="fw-semibold">{{ chapter.name }}</span>
+									</div>
+								</td>
+								<td>
+									{% set subject = chapter.subject_id and Subject.query.get(chapter.subject_id) %} {% if subject %}
+									<span class="badge bg-primary">{{ subject.name }}</span>
+									{% else %}
+									<span class="badge bg-secondary">Unknown Subject</span>
+									{% endif %}
+								</td>
+								<td class="text-end">
+									<a href="{{ url_for('user.subject_quizzes', subject_id=chapter.subject_id, chapter_id=chapter.id) }}" class="btn btn-sm btn-info text-white"> <i class="fas fa-filter me-1"></i> View Quizzes </a>
+								</td>
+							</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endif %}
+
+<!-- Quizzes Section -->
+{% if quiz_results|length > 0 %}
+<div class="row mb-4">
+	<div class="col-12">
+		<div class="card shadow-sm">
+			<div class="card-header bg-white">
+				<div class="d-flex align-items-center">
+					<div class="icon-shape bg-gradient-success shadow text-white text-center rounded-circle me-3">
+						<i class="fas fa-file-alt"></i>
+					</div>
+					<h5 class="mb-0">Quizzes ({{ quiz_results|length }})</h5>
+				</div>
+			</div>
+			<div class="card-body p-0">
+				<div class="table-responsive">
+					<table class="table table-hover mb-0">
+						<thead class="table-light">
+							<tr>
+								<th>Quiz Name</th>
+								<th>Subject</th>
+								<th class="text-center">Date</th>
+								<th class="text-center">Status</th>
+								<th class="text-end">Action</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for quiz in quiz_results %}
+							<tr>
+								<td>
+									<div class="d-flex align-items-center">
+										<div class="icon-shape bg-gradient-success shadow-sm text-white text-center rounded-circle me-2" style="width: 30px; height: 30px">
+											<i class="fas fa-file-alt"></i>
+										</div>
+										<span class="fw-semibold">{{ quiz.quiz_name }}</span>
+									</div>
+								</td>
+								<td>
+									{% set subject = quiz.subject_id and Subject.query.get(quiz.subject_id) %} {% if subject %}
+									<a href="{{ url_for('user.subject_quizzes', subject_id=quiz.subject_id) }}" class="badge bg-primary text-decoration-none"> {{ subject.name }} </a>
+									{% else %}
+									<span class="badge bg-secondary">Unknown Subject</span>
+									{% endif %}
+								</td>
+								<td class="text-center">
+									<span class="small text-muted">{{ quiz.date_of_quiz.strftime('%d %b, %Y') }}</span>
+								</td>
+								<td class="text-center">
+									{% if quiz.id in user_attempts %}
+									<div class="score-circle {% if user_attempts[quiz.id].total_score >= 80 %} bg-success {% elif user_attempts[quiz.id].total_score >= 50 %} bg-warning {% else %} bg-danger {% endif %}" data-bs-toggle="tooltip" title="Last attempt score">{{ user_attempts[quiz.id].total_score }}</div>
+									{% else %}
+									<span class="badge bg-secondary-subtle text-secondary">Not Attempted</span>
+									{% endif %}
+								</td>
+								<td class="text-end">
+									{% if quiz.id in user_attempts %}
+									<a href="{{ url_for('user.quiz_results', score_id=user_attempts[quiz.id].id) }}" class="btn btn-sm btn-outline-info me-1" data-bs-toggle="tooltip" title="View Results">
+										<i class="fas fa-eye"></i>
+									</a>
+									<a href="{{ url_for('user.quiz_start', quiz_id=quiz.id) }}" class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" title="Retake Quiz">
+										<i class="fas fa-redo-alt"></i>
+									</a>
+									{% else %}
+									<a href="{{ url_for('user.quiz_start', quiz_id=quiz.id) }}" class="btn btn-sm btn-primary"> <i class="fas fa-play me-1"></i> Start Quiz </a>
+									{% endif %}
+								</td>
+							</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endif %}
+
+<!-- No Results Section -->
+{% if subject_results|length == 0 and chapter_results|length == 0 and quiz_results|length == 0 %}
+<div class="row">
+	<div class="col-12">
+		<div class="card shadow-sm">
+			<div class="card-body text-center py-5">
+				<div class="mb-3">
+					<i class="fas fa-search fa-4x text-secondary opacity-25"></i>
+				</div>
+				<h5 class="text-secondary">No results found</h5>
+				<p class="text-muted mb-4">We couldn't find anything matching "{{ search_term }}"</p>
+				<div class="row justify-content-center">
+					<div class="col-md-8 col-lg-6">
+						<div class="mb-3">
+							<div class="alert alert-light border">
+								<h6 class="alert-heading">Search tips:</h6>
+								<ul class="mb-0 text-start small">
+									<li>Check spelling and try again</li>
+									<li>Try more general keywords</li>
+									<li>Try different keywords</li>
+								</ul>
+							</div>
+						</div>
+						<div class="d-flex justify-content-center gap-2">
+							<a href="{{ url_for('user.user_dashboard') }}" class="btn btn-outline-secondary"> <i class="fas fa-home me-1"></i> Back to Dashboard </a>
+							<a href="{{ url_for('user.subjects_list') }}" class="btn btn-primary"> <i class="fas fa-book me-1"></i> Browse Subjects </a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endif %} {% endblock %} {% block additional_styles %}
+<style>
+	.icon-shape {
+		width: 36px;
+		height: 36px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.score-circle {
+		width: 32px;
+		height: 32px;
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: white;
+		font-weight: bold;
+		font-size: 12px;
+		margin: 0 auto;
+	}
+
+	.bg-gradient-primary {
+		background: linear-gradient(87deg, #5e72e4 0, #825ee4 100%) !important;
+	}
+
+	.bg-gradient-info {
+		background: linear-gradient(87deg, #11cdef 0, #1171ef 100%) !important;
+	}
+
+	.bg-gradient-success {
+		background: linear-gradient(87deg, #2dce89 0, #2dcecc 100%) !important;
+	}
+
+	.bg-secondary-subtle {
+		background-color: rgba(108, 117, 125, 0.1);
+	}
+</style>
+{% endblock %} {% block scripts %}
+<script>
+	document.addEventListener("DOMContentLoaded", function () {
+		// Initialize tooltips
+		const tooltips = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+		tooltips.map(function (tooltip) {
+			return new bootstrap.Tooltip(tooltip);
+		});
+	});
+</script>
+{% endblock %}
