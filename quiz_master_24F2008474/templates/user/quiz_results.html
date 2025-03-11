@@ -1,411 +1,317 @@
-{% extends 'base.html' %} {% block title %}Quiz Results - {{ quiz.quiz_name }}{%
-endblock %} {% block head %} {{ super() }}
+{% extends 'base.html' %} {% block title %}Quiz Results | {{ quiz.quiz_name }}{% endblock %} {% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-2">
+	<div>
+		<h2 class="mb-0">All Quizzes {{ quiz.quiz_name }}</h2>
+	</div>
+	<div class="ms-auto d-flex gap-2">
+		<form action="{{ url_for('user.search_quizzes') }}" method="GET">
+			<div class="input-group">
+				<input type="text" name="q" class="form-control" placeholder="Search subjects or quizzes..." minlength="3" required />
+				<button class="btn btn-primary" type="submit">
+					<i class="fas fa-search"></i>
+				</button>
+			</div>
+		</form>
+	</div>
+</div>
+
+<!-- Flash Messages -->
+{% with messages = get_flashed_messages(with_categories=true) %} {% if messages %} {% for category, message in messages %}
+<div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show">
+	{{ message }}
+	<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endfor %} {% endif %} {% endwith %}
+
+<div class="row">
+	<!-- Score Summary -->
+	<div class="col-lg-4 mb-4">
+		<div class="card shadow-sm mb-4">
+			<div class="card-header bg-white">
+				<h5 class="mb-0">Score Summary</h5>
+			</div>
+			<div class="card-body">
+				<div class="text-center mb-4">
+					<div class="large-score-circle mx-auto {% if summary_stats.total_score >= 80 %} bg-success {% elif summary_stats.total_score >= 50 %} bg-warning {% else %} bg-danger {% endif %}">
+						<div class="text-white">
+							<div class="display-4 fw-bold">{{ summary_stats.total_score }}</div>
+							<div>Points</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="table-responsive">
+					<table class="table table-sm">
+						<tbody>
+							<tr>
+								<td>Total Questions:</td>
+								<td class="text-end fw-bold">{{ summary_stats.total_questions }}</td>
+							</tr>
+							<tr>
+								<td>Correct Answers:</td>
+								<td class="text-end fw-bold text-success">{{ summary_stats.correct_answers }}</td>
+							</tr>
+							<tr>
+								<td>Wrong Answers:</td>
+								<td class="text-end fw-bold text-danger">{{ summary_stats.wrong_answers }}</td>
+							</tr>
+							<tr>
+								<td>Skipped:</td>
+								<td class="text-end fw-bold text-warning">{{ summary_stats.skipped }}</td>
+							</tr>
+							<tr>
+								<td>Accuracy:</td>
+								<td class="text-end fw-bold">{{ summary_stats.accuracy }}%</td>
+							</tr>
+							<tr>
+								<td>Date:</td>
+								<td class="text-end">{{ summary_stats.date }}</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+
+				<!-- Performance Chart -->
+				<div class="mt-4">
+					<h6 class="mb-3">Performance Chart</h6>
+					<img src="data:image/png;base64,{{ performance_chart }}" class="img-fluid" alt="Performance Chart" />
+				</div>
+
+				<!-- Quiz Details -->
+				<div class="mt-4 pt-3 border-top">
+					<h6 class="mb-3">Quiz Details</h6>
+					<div class="mb-2">
+						<div class="small text-muted">Subject</div>
+						<div>{{ subject.name }}</div>
+					</div>
+
+					{% if chapter %}
+					<div class="mb-2">
+						<div class="small text-muted">Chapter</div>
+						<div>{{ chapter.name }}</div>
+					</div>
+					{% endif %}
+
+					<div class="mb-0">
+						<div class="small text-muted">Quiz Date</div>
+						<div>{{ quiz.date_of_quiz.strftime('%d %b %Y') }}</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Action Buttons -->
+		<div class="d-grid gap-2">
+			<a href="{{ url_for('user.quiz_start', quiz_id=quiz.id) }}" class="btn btn-primary"> <i class="fas fa-redo-alt me-1"></i> Retake Quiz </a>
+			<a href="{{ url_for('user.subject_quizzes', subject_id=quiz.subject_id) }}" class="btn btn-outline-primary"> <i class="fas fa-arrow-left me-1"></i> Back to Subject Quizzes </a>
+		</div>
+	</div>
+
+	<!-- Questions and Answers -->
+	<div class="col-lg-8">
+		<div class="card shadow-sm">
+			<div class="card-header bg-white d-flex justify-content-between align-items-center">
+				<h5 class="mb-0">Questions & Answers</h5>
+				<button class="btn btn-sm btn-outline-primary" id="toggleAllBtn"><i class="fas fa-expand-alt me-1"></i> Expand All</button>
+			</div>
+			<div class="card-body p-0">
+				<div class="accordion" id="questionsAccordion">
+					{% for result in question_results %}
+					<div class="accordion-item">
+						<h2 class="accordion-header" id="heading{{ result.question.id }}">
+							<button class="accordion-button collapsed {% if result.is_correct %}question-correct {% elif result.is_skipped %}question-skipped {% else %}question-incorrect{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ result.question.id }}" aria-expanded="false" aria-controls="collapse{{ result.question.id }}">
+								<div class="d-flex align-items-center w-100">
+									<div class="question-number me-3">{{ loop.index }}</div>
+									<div class="fw-normal text-truncate me-2">{{ result.question.question_statement }}</div>
+									<div class="ms-auto">
+										{% if result.is_correct %}
+										<span class="badge bg-success ms-2">Correct</span>
+										{% elif result.is_skipped %}
+										<span class="badge bg-warning ms-2">Skipped</span>
+										{% else %}
+										<span class="badge bg-danger ms-2">Incorrect</span>
+										{% endif %}
+									</div>
+								</div>
+							</button>
+						</h2>
+						<div id="collapse{{ result.question.id }}" class="accordion-collapse collapse" aria-labelledby="heading{{ result.question.id }}" data-bs-parent="#questionsAccordion">
+							<div class="accordion-body">
+								<p class="mb-3 fw-medium">{{ result.question.question_statement }}</p>
+
+								<div class="mb-3 mt-3">
+									{% for option in result.options %}
+									<div class="option-box mt-2 {% if option.index == result.correct_option %} {% elif option.index == result.user_answer and option.index != result.correct_option %}option-incorrect {% elif option.index == result.user_answer %}option-selected{% endif %}">
+										<span class="option-indicator">{{ ['A', 'B', 'C', 'D'][option.index] }}</span>
+										{{ option.text }}
+									</div>
+									{% endfor %}
+								</div>
+
+								<div class="mt-3 pt-2 border-top">
+									<div class="small text-muted mb-1">Explanation:</div>
+									{% if result.question.explanation %}
+									<p class="mb-0">{{ result.question.explanation }}</p>
+									{% else %}
+									<p class="mb-0 fst-italic">No explanation provided.</p>
+									{% endif %}
+								</div>
+							</div>
+						</div>
+					</div>
+					{% endfor %}
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %} {% block additional_styles %}
 <style>
-	.result-card {
-		transition: all 0.3s ease;
-	}
-	.result-card:hover {
-		transform: translateY(-5px);
-		box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-	}
-	.option-correct {
-		background-color: rgba(45, 206, 137, 0.15);
-		border: 1px solid #2dce89;
-	}
-	.option-incorrect {
-		background-color: rgba(245, 54, 92, 0.15);
-		border: 1px solid #f5365c;
-	}
-	.option-box {
-		padding: 10px 15px;
-		border-radius: 5px;
-		margin-bottom: 10px;
-	}
-	.question-section {
-		padding: 20px;
-		border-radius: 10px;
-		margin-bottom: 20px;
-		border: 1px solid #e9ecef;
-		background-color: #fff;
-	}
-	.explanation {
-		background-color: #f8f9fa;
-		border-left: 4px solid #5e72e4;
-		padding: 10px 15px;
-		margin-top: 15px;
-	}
-	.score-circle {
-		width: 150px;
-		height: 150px;
+	.large-score-circle {
+		width: 120px;
+		height: 120px;
 		border-radius: 50%;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		margin: 0 auto;
 	}
-	.score-circle h1 {
-		font-size: 3rem;
-		margin: 0;
+
+	.question-number {
+		width: 28px;
+		height: 28px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: 50%;
+		background-color: #e9ecef;
+		color: #495057;
+		font-weight: bold;
+		flex-shrink: 0;
+	}
+
+	.question-correct .question-number {
+		background-color: #2dce89;
 		color: white;
 	}
-	.score-detail {
-		text-align: center;
-		margin-top: 15px;
-	}
-	.quiz-stats {
-		margin-top: 15px;
+
+	.question-incorrect .question-number {
+		background-color: #f5365c;
+		color: white;
 	}
 
-	.progress {
-		height: 8px;
-		margin-bottom: 10px;
+	.question-skipped .question-number {
+		background-color: #ffd600;
+		color: #212529;
 	}
 
-	.marker-correct {
+	.accordion-button:not(.collapsed).question-correct {
+		background-color: rgba(45, 206, 137, 0.1);
 		color: #2dce89;
 	}
-	.marker-incorrect {
+
+	.accordion-button:not(.collapsed).question-incorrect {
+		background-color: rgba(245, 54, 92, 0.1);
 		color: #f5365c;
 	}
-	.marker-default {
-		color: #adb5bd;
+
+	.accordion-button:not(.collapsed).question-skipped {
+		background-color: rgba(255, 214, 0, 0.1);
+		color: #ffc107;
 	}
 
-	.summary-pills {
-		display: flex;
-		justify-content: center;
-		margin-bottom: 20px;
+	.option-box {
+		padding: 10px 15px;
+		border-radius: 8px;
+		background-color: #f8f9fa;
+		position: relative;
+		padding-left: 45px;
 	}
 
-	.summary-pill {
-		padding: 10px 20px;
-		border-radius: 30px;
-		margin: 0 10px;
+	.option-selected {
+		background-color: rgba(78, 115, 223, 0.1);
+		border: 1px solid #4e73df;
+	}
+
+	.option-correct {
+		background-color: rgba(45, 206, 137, 0.1);
+		border: 1px solid #2dce89;
+	}
+
+	.option-incorrect {
+		background-color: rgba(245, 54, 92, 0.1);
+		border: 1px solid #f5365c;
+	}
+
+	.option-indicator {
+		position: absolute;
+		left: 12px;
+		top: 50%;
+		transform: translateY(-50%);
+		width: 24px;
+		height: 24px;
 		display: flex;
-		flex-direction: column;
 		align-items: center;
-		min-width: 100px;
-	}
-
-	.summary-pill .count {
-		font-size: 1.5rem;
+		justify-content: center;
+		border-radius: 50%;
+		background-color: #e9ecef;
+		color: #495057;
 		font-weight: bold;
 	}
 
-	.summary-pill .label {
-		font-size: 0.8rem;
-		text-transform: uppercase;
+	.option-selected .option-indicator {
+		background-color: #4e73df;
+		color: white;
+	}
+
+	.option-correct .option-indicator {
+		background-color: #2dce89;
+		color: white;
+	}
+
+	.option-incorrect .option-indicator {
+		background-color: #f5365c;
+		color: white;
 	}
 </style>
-{% endblock %} {% block content %}
-<div class="container-fluid py-4">
-	<div class="row">
-		<div class="col-lg-12 mb-4">
-			<div class="card">
-				<div class="card-header pb-0">
-					<div class="d-flex justify-content-between align-items-center">
-						<div>
-							<h5>Quiz Results</h5>
-							<p class="text-sm mb-0">
-								<span class="font-weight-bold">{{ quiz.quiz_name }}</span>
-							</p>
-						</div>
-						<div>
-							<a
-								href="{{ url_for('user.subject_quizzes', subject_id=quiz.subject_id) }}"
-								class="btn btn-outline-secondary btn-sm me-2">
-								<i class="fas fa-list me-1"></i> All Quizzes
-							</a>
-							<a
-								href="{{ url_for('user.quiz_take', quiz_id=quiz.id, retake=1) }}"
-								class="btn btn-outline-primary btn-sm">
-								<i class="fas fa-redo me-1"></i> Retake Quiz
-							</a>
-						</div>
-					</div>
-				</div>
-
-				<div class="card-body">
-					<!-- Result Summary -->
-					<div class="row mb-4">
-						<div class="col-md-4">
-							<div class="card result-card shadow-sm">
-								<div class="card-body text-center">
-									{% set percentage = (score.total_score /
-									(questions|sum(attribute='marks'))) * 100 if
-									questions|sum(attribute='marks') > 0 else 0 %} {% if
-									percentage >= 80 %} {% set color_class = "bg-gradient-success"
-									%} {% set emoji = "🏆" %} {% set message = "Excellent!" %} {%
-									elif percentage >= 60 %} {% set color_class =
-									"bg-gradient-info" %} {% set emoji = "👍" %} {% set message =
-									"Good job!" %} {% elif percentage >= 40 %} {% set color_class
-									= "bg-gradient-warning" %} {% set emoji = "🤔" %} {% set
-									message = "Not bad!" %} {% else %} {% set color_class =
-									"bg-gradient-danger" %} {% set emoji = "📚" %} {% set message
-									= "Keep studying!" %} {% endif %}
-
-									<div class="score-circle {{ color_class }}">
-										<h1>{{ score.total_score }}</h1>
-									</div>
-									<div class="score-detail">
-										<h4>{{ message }} {{ emoji }}</h4>
-										<p>{{ percentage|round(1) }}% score achieved</p>
-										<p class="text-sm text-muted">
-											Completed on {{ score.timestamp_of_attempt.strftime('%B
-											%d, %Y at %H:%M') }}
-										</p>
-									</div>
-								</div>
-							</div>
-						</div>
-
-						<div class="col-md-8">
-							<div class="card result-card shadow-sm">
-								<div class="card-body">
-									<h5 class="mb-3">Performance Summary</h5>
-
-									<div class="summary-pills">
-										<div class="summary-pill bg-success bg-opacity-10">
-											<span class="count text-success"
-												>{{ score.correct_answers }}</span
-											>
-											<span class="label text-success">Correct</span>
-										</div>
-										<div class="summary-pill bg-danger bg-opacity-10">
-											<span class="count text-danger"
-												>{{ score.wrong_answers }}</span
-											>
-											<span class="label text-danger">Wrong</span>
-										</div>
-										<div class="summary-pill bg-warning bg-opacity-10">
-											<span class="count text-warning"
-												>{{ score.skipped }}</span
-											>
-											<span class="label text-warning">Skipped</span>
-										</div>
-										<div class="summary-pill bg-primary bg-opacity-10">
-											<span class="count text-primary"
-												>{{ questions|length }}</span
-											>
-											<span class="label text-primary">Total</span>
-										</div>
-									</div>
-
-									<div class="quiz-stats">
-										<div class="row">
-											<div class="col-md-6">
-												<div class="d-flex justify-content-between mb-1">
-													<span>Accuracy</span>
-													<span
-														>{{ ((score.correct_answers / questions|length) *
-														100)|round(1) if questions|length else 0 }}%</span
-													>
-												</div>
-												<div class="progress">
-													<div
-														class="progress-bar bg-info"
-														role="progressbar"
-														style="width: {{ ((score.correct_answers / questions|length) * 100) if questions|length else 0 }}%"></div>
-												</div>
-											</div>
-											<div class="col-md-6">
-												<div class="d-flex justify-content-between mb-1">
-													<span>Completion</span>
-													<span
-														>{{ (((questions|length - score.skipped) /
-														questions|length) * 100)|round(1) if
-														questions|length else 0 }}%</span
-													>
-												</div>
-												<div class="progress">
-													<div
-														class="progress-bar bg-primary"
-														role="progressbar"
-														style="width: {{ (((questions|length - score.skipped) / questions|length) * 100) if questions|length else 0 }}%"></div>
-												</div>
-											</div>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<!-- Detailed Results -->
-					<div class="card shadow-sm">
-						<div class="card-header pb-0">
-							<div class="d-flex justify-content-between align-items-center">
-								<h5 class="mb-0">Question Analysis</h5>
-								<button
-									class="btn btn-sm btn-outline-primary"
-									id="toggleAllBtn">
-									<i class="fas fa-expand-alt me-1"></i> Expand All
-								</button>
-							</div>
-						</div>
-						<div class="card-body">
-							<div class="accordion" id="questionsAccordion">
-								{% for question in questions %}
-								<div class="accordion-item">
-									<h2 class="accordion-header" id="heading{{ question.id }}">
-										<button
-											class="accordion-button collapsed"
-											type="button"
-											data-bs-toggle="collapse"
-											data-bs-target="#collapse{{ question.id }}"
-											aria-expanded="false"
-											aria-controls="collapse{{ question.id }}">
-											<div
-												class="d-flex justify-content-between w-100 align-items-center">
-												<div>
-													<span class="me-2">Question {{ loop.index }}</span>
-													{% if question.id in user_answers and
-													user_answers[question.id] == question.correct_options
-													%}
-													<span class="badge bg-success"
-														>+{{ question.marks }}</span
-													>
-													{% elif question.id in user_answers %}
-													<span class="badge bg-danger"
-														>-{{ question.negative_marks }}</span
-													>
-													{% else %}
-													<span class="badge bg-warning">Skipped</span>
-													{% endif %}
-												</div>
-												<div class="text-end d-flex align-items-center">
-													{% if question.id in user_answers and
-													user_answers[question.id] == question.correct_options
-													%}
-													<i class="fas fa-check-circle me-2 text-success"></i>
-													Correct {% elif question.id in user_answers %}
-													<i class="fas fa-times-circle me-2 text-danger"></i>
-													Incorrect {% else %}
-													<i class="fas fa-minus-circle me-2 text-warning"></i>
-													Not Answered {% endif %}
-												</div>
-											</div>
-										</button>
-									</h2>
-									<div
-										id="collapse{{ question.id }}"
-										class="accordion-collapse collapse"
-										aria-labelledby="heading{{ question.id }}"
-										data-bs-parent="#questionsAccordion">
-										<div class="accordion-body">
-											<p class="mb-3">
-												<strong>{{ question.question_statement }}</strong>
-											</p>
-
-											{% if question.question_image %}
-											<div class="text-center my-2">
-												<img
-													src="{{ url_for('static', filename='uploads/' + question.question_image) }}"
-													alt="Question Image"
-													class="img-fluid"
-													style="max-height: 200px" />
-											</div>
-											{% endif %}
-
-											<div class="options mt-3">
-												{% for option_num in range(1, 5) %} {% set option_field
-												= "option" ~ option_num %} {% set option_text =
-												question[option_field] %} {% set option_image_field =
-												"option" ~ option_num ~ "_image" %} {% set option_image
-												= question[option_image_field] %}
-
-												<div
-													class="option-box {% if option_num == question.correct_options %} option-correct {% elif question.id in user_answers and user_answers[question.id] == option_num %} option-incorrect {% endif %}">
-													<div class="d-flex align-items-center">
-														<div class="me-2">
-															{% if option_num == question.correct_options %}
-															<i class="fas fa-check-circle marker-correct"></i>
-															{% elif question.id in user_answers and
-															user_answers[question.id] == option_num %}
-															<i
-																class="fas fa-times-circle marker-incorrect"></i>
-															{% else %}
-															<span class="marker-default"
-																>{{ ["A", "B", "C", "D"][option_num-1] }}.</span
-															>
-															{% endif %}
-														</div>
-														<div>{{ option_text }}</div>
-
-														{% if option_num == question.correct_options %}
-														<div class="ms-auto">
-															<span class="badge bg-success"
-																>Correct Answer</span
-															>
-														</div>
-														{% elif question.id in user_answers and
-														user_answers[question.id] == option_num %}
-														<div class="ms-auto">
-															<span class="badge bg-danger">Your Answer</span>
-														</div>
-														{% endif %}
-													</div>
-
-													{% if option_image %}
-													<div class="text-center mt-2">
-														<img src="{{ url_for('static', filename='uploads/' +
-														option_image) }}" alt="Option {{ ["A", "B", "C",
-														"D"][option_num-1] }} Image" class="img-fluid"
-														style="max-height: 100px;">
-													</div>
-													{% endif %}
-												</div>
-												{% endfor %}
-											</div>
-
-											{% if question.explanation %}
-											<div class="explanation mt-3">
-												<h6>
-													<i class="fas fa-info-circle me-2"></i> Explanation:
-												</h6>
-												<p class="mb-0">{{ question.explanation }}</p>
-											</div>
-											{% endif %}
-										</div>
-									</div>
-								</div>
-								{% endfor %}
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-</div>
 {% endblock %} {% block scripts %}
 <script>
 	document.addEventListener("DOMContentLoaded", function () {
-		// Toggle all questions expand/collapse
+		// Initialize tooltips
+		const tooltips = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+		tooltips.map(function (tooltip) {
+			return new bootstrap.Tooltip(tooltip);
+		});
+
+		// Toggle all questions
 		const toggleAllBtn = document.getElementById("toggleAllBtn");
-		const accordionItems = document.querySelectorAll(".accordion-collapse");
+		const allQuestions = document.querySelectorAll(".accordion-button");
 		let isExpanded = false;
 
 		toggleAllBtn.addEventListener("click", function () {
 			isExpanded = !isExpanded;
 
-			accordionItems.forEach((item) => {
+			allQuestions.forEach((question) => {
+				const target = document.querySelector(question.getAttribute("data-bs-target"));
+
 				if (isExpanded) {
-					item.classList.add("show");
+					question.classList.remove("collapsed");
+					question.setAttribute("aria-expanded", "true");
+					target.classList.add("show");
 				} else {
-					item.classList.remove("show");
+					question.classList.add("collapsed");
+					question.setAttribute("aria-expanded", "false");
+					target.classList.remove("show");
 				}
 			});
 
-			// Update button text
-			if (isExpanded) {
-				toggleAllBtn.innerHTML =
-					'<i class="fas fa-compress-alt me-1"></i> Collapse All';
-			} else {
-				toggleAllBtn.innerHTML =
-					'<i class="fas fa-expand-alt me-1"></i> Expand All';
-			}
+			toggleAllBtn.innerHTML = isExpanded ? '<i class="fas fa-compress-alt me-1"></i> Collapse All' : '<i class="fas fa-expand-alt me-1"></i> Expand All';
 		});
+		// Highlight the active link in sidebar
+		const subjectLink = document.querySelector('a[href="{{ url_for("user.user_quizzes") }}"]');
+		if (subjectLink) {
+			subjectLink.classList.add("active");
+		}
 	});
 </script>
 {% endblock %}
