@@ -1,0 +1,130 @@
+{% extends 'base.html' %} {% block title %}Subjects | Quiz Master{% endblock %} {% block content %}
+<div class="container-fluid">
+	<!-- Header Section -->
+	<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+		<div>
+			<h2 class="h3 mb-1">Subjects</h2>
+		</div>
+		<div class="d-flex gap-2">
+			<form action="{{ url_for('user.search_quizzes') }}" method="GET" class="d-flex">
+				<div class="input-group">
+					<input type="text" name="q" class="form-control" placeholder="Search subjects or quizzes..." minlength="3" required />
+					<button class="btn btn-primary" type="submit">
+						<i class="fas fa-search"></i>
+					</button>
+				</div>
+			</form>
+		</div>
+	</div>
+
+	<!-- Flash Messages -->
+	{% with messages = get_flashed_messages(with_categories=true) %} {% if messages %} {% for category, message in messages %}
+	<div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show">
+		{{ message }}
+		<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+	</div>
+	{% endfor %} {% endif %} {% endwith %}
+
+	<!-- Subjects Grid -->
+	<div class="row g-3">
+		{% if subjects %} {% for subject in subjects %}
+		<div class="col-md-6 col-lg-4 col-xl-3 subject-card">
+			<div class="card h-100 shadow-sm">
+				<div class="card-body">
+					<div class="d-flex align-items-center mb-3">
+						<div class="icon-shape bg-gradient-primary shadow text-white text-center rounded-circle me-3">
+							<i class="fas fa-book"></i>
+						</div>
+						<h5 class="mb-0">{{ subject.name }}</h5>
+					</div>
+
+					{% if subject.description %}
+					<p class="text-muted mb-3">{{ subject.description|truncate(100) }}</p>
+					{% else %}
+					<p class="text-muted mb-3">Explore quizzes in this subject area.</p>
+					{% endif %}
+
+					<!-- Quiz Statistics -->
+					{% set quiz_count = subject.quizzes|length if subject.quizzes is defined else 0 %} {% set chapters = subject.chapters|length if subject.chapters is defined else 0 %}
+
+					<div class="d-flex justify-content-between mb-3">
+						<div class="badge bg-light text-dark p-2"><i class="fas fa-file-alt me-1"></i> {{ quiz_count }} Quizzes</div>
+						<div class="badge bg-light text-dark p-2"><i class="fas fa-list me-1"></i> {{ chapters }} Chapters</div>
+					</div>
+
+					<div class="d-grid">
+						<a href="{{ url_for('user.subject_quizzes', subject_id=subject.id) }}" class="btn btn-outline-primary">
+							<i class="fas fa-chevron-right me-1"></i>
+							Explore Quizzes
+						</a>
+					</div>
+				</div>
+			</div>
+		</div>
+		{% endfor %} {% else %}
+		<!-- Empty State -->
+		<div class="col-12">
+			<div class="card shadow-sm">
+				<div class="card-body text-center py-5">
+					<div class="mb-3">
+						<i class="fas fa-book-open fa-4x text-secondary opacity-25"></i>
+					</div>
+					<h5 class="text-secondary">No Subjects Available</h5>
+					<p class="text-muted mb-0">There are no subjects available at the moment. Please check back later.</p>
+				</div>
+			</div>
+		</div>
+		{% endif %}
+	</div>
+
+	<div class="d-md-none mt-4">
+		<a href="{{ url_for('user.user_dashboard') }}" class="btn btn-outline-secondary w-100"> <i class="fas fa-arrow-left me-2"></i> Back to Dashboard </a>
+	</div>
+</div>
+{% endblock %} {% block additional_styles %}
+<style>
+	.icon-shape {
+		width: 48px;
+		height: 48px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.subject-card .card {
+		transition: all 0.3s ease;
+		border: 1px solid rgba(0, 0, 0, 0.08);
+	}
+
+	.subject-card:hover .card {
+		transform: translateY(-5px);
+		box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+	}
+
+	.bg-gradient-primary {
+		background: linear-gradient(87deg, #5e72e4 0, #825ee4 100%) !important;
+	}
+
+	@media (max-width: 767.98px) {
+		.icon-shape {
+			width: 40px;
+			height: 40px;
+		}
+	}
+</style>
+{% endblock %} {% block scripts %}
+<script>
+	document.addEventListener("DOMContentLoaded", function () {
+		// Initialize tooltips
+		const tooltips = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+		tooltips.map(function (tooltip) {
+			return new bootstrap.Tooltip(tooltip);
+		});
+		// Highlight the active link in sidebar
+		const subjectLink = document.querySelector('a[href="{{ url_for("user.subjects_list") }}"]');
+		if (subjectLink) {
+			subjectLink.classList.add("active");
+		}
+	});
+</script>
+{% endblock %}
