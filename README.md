@@ -21,17 +21,17 @@ Quiz Master is a multi-user web application designed for exam preparation across
   - [x] View and manage registered users.
   - [x] View quiz performance and generate summary charts.
 - **Search Functionalities:**
-  - [ ] Search users, subjects, and quizzes.
+  - [x] Search users, subjects, and quizzes.
 
 ### User
 - **Registration & Authentication:**
-  - [ ] Users must sign up with an email and password.
-  - [ ] Additional fields include full name, qualification, and date of birth.
+  - [x] Users must sign up with an email and password.
+  - [x] Additional fields include full name, qualification, and date of birth.
 - **Quiz Management:**
-  - [ ] Select subject and chapter for quiz attempts.
-  - [ ] Timed quizzes (optional timer feature).
-  - [ ] View previous quiz attempts and scores.
-  - [ ] Summary charts for performance tracking.
+  - [x] Select subject and chapter for quiz attempts.
+  - [x] Timed quizzes (optional timer feature).
+  - [x] View previous quiz attempts and scores.
+  - [x] Summary charts for performance tracking.
 
 ## Database Schema
 
