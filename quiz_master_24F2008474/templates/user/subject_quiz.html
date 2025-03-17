@@ -4,31 +4,32 @@
 
 {% block content %}
 <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-2">
-  <div>
-    <h2 class="mb-0">{{ subject.name }}</h2>
-  </div>
-  <div class="ms-auto d-flex gap-2">
-    <form action="{{ url_for('user.search_quizzes') }}" method="GET">
-      <div class="input-group">
-        <input type="text" name="q" class="form-control" placeholder="Search subjects or quizzes..." minlength="3" required />
-        <button class="btn btn-primary" type="submit">
-          <i class="fas fa-search"></i>
-        </button>
-      </div>
-    </form>
-  </div>
+    <div>
+        <h2 class="mb-0">{{ subject.name }}</h2>
+    </div>
+    <div class="ms-auto d-flex gap-2">
+        <form action="{{ url_for('user.search_quizzes') }}" method="GET">
+            <div class="input-group">
+                <input type="text" name="q" class="form-control" placeholder="Search subjects or quizzes..."
+                    minlength="3" required />
+                <button class="btn btn-primary" type="submit">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
 
 <!-- Flash Messages -->
 {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-        {% for category, message in messages %}
-            <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        {% endfor %}
-    {% endif %}
+{% if messages %}
+{% for category, message in messages %}
+<div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show">
+    {{ message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endfor %}
+{% endif %}
 {% endwith %}
 
 <div class="row">
@@ -41,33 +42,34 @@
 
                         <h5 class="mb-0">Available Quizzes</h5>
                     </div>
-                    
+
                     <!-- Search and Filter Form -->
-                    <form action="{{ url_for('user.subject_quizzes', subject_id=subject.id) }}" method="GET" class="d-flex gap-2">
-              
-                        
+                    <form action="{{ url_for('user.subject_quizzes', subject_id=subject.id) }}" method="GET"
+                        class="d-flex gap-2">
+
+
                         {% if chapters %}
                         <select name="chapter_id" class="form-select form-select-sm">
                             <option value="">All Chapters</option>
                             {% for chapter in chapters %}
-                            <option value="{{ chapter.id }}" {% if chapter_id == chapter.id %}selected{% endif %}>
+                            <option value="{{ chapter.id }}" {% if chapter_id==chapter.id %}selected{% endif %}>
                                 {{ chapter.name }}
                             </option>
                             {% endfor %}
                         </select>
                         {% endif %}
-                        
+
                         <select name="sort" class="form-select form-select-sm">
-                            <option value="date" {% if sort_by == 'date' %}selected{% endif %}>Newest</option>
-                            <option value="name" {% if sort_by == 'name' %}selected{% endif %}>Name</option>
-                            <option value="chapter" {% if sort_by == 'chapter' %}selected{% endif %}>Chapter</option>
+                            <option value="date" {% if sort_by=='date' %}selected{% endif %}>Newest</option>
+                            <option value="name" {% if sort_by=='name' %}selected{% endif %}>Name</option>
+                            <option value="chapter" {% if sort_by=='chapter' %}selected{% endif %}>Chapter</option>
                         </select>
-                        
+
                         <button type="submit" class="btn btn-sm btn-primary">Apply</button>
                     </form>
                 </div>
             </div>
-            
+
             <!-- Quiz Stats -->
             {% if quizzes %}
             <div class="quiz-stats px-3 py-2 bg-light border-top border-bottom">
@@ -90,93 +92,85 @@
 
             <div class="card-body p-0">
                 {% if quizzes %}
-                    <div class="table-responsive">
-                        <table class="table table-hover mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Quiz Name</th>
-                                    <th>Chapter</th>
-                                    <th class="text-center">Date</th>
-                                    <th class="text-center">Score</th>
-                                    <th class="text-end">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for quiz in quizzes %}
-                                <tr>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <div class="icon-shape bg-gradient-info shadow-sm text-white text-center rounded-circle me-3">
-                                                <i class="fas fa-file-alt"></i>
-                                            </div>
-                                            <span class="fw-semibold">{{ quiz.quiz_name }}</span>
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Quiz Name</th>
+                                <th>Chapter</th>
+                                <th class="text-center">Date</th>
+                                <th class="text-center">Score</th>
+                                <th class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for quiz in quizzes %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div
+                                            class="icon-shape bg-gradient-info shadow-sm text-white text-center rounded-circle me-3">
+                                            <i class="fas fa-file-alt"></i>
                                         </div>
-                                    </td>
-                                    <td>
-                                        {% for chapter in chapters %}
-                                            {% if chapter.id == quiz.chapter_id %}
-                                                <span class="badge bg-light text-dark">{{ chapter.name }}</span>
-                                            {% endif %}
-                                        {% endfor %}
-                                    </td>
-                                    <td class="text-center">
-                                        <span class="small text-muted">{{ quiz.date_of_quiz.strftime('%d %b, %Y') }}</span>
-                                    </td>
-                                    <td class="text-center">
-                                        {% if quiz.id in user_attempts %}
-                                            <div class="score-circle 
+                                        <span class="fw-semibold">{{ quiz.quiz_name }}</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% for chapter in chapters %}
+                                    {% if chapter.id == quiz.chapter_id %}
+                                    <span class="badge bg-light text-dark">{{ chapter.name }}</span>
+                                    {% endif %}
+                                    {% endfor %}
+                                </td>
+                                <td class="text-center">
+                                    <span class="small text-muted">{{ quiz.date_of_quiz.strftime('%d %b, %Y') }}</span>
+                                </td>
+                                <td class="text-center">
+                                    {% if quiz.id in user_attempts %}
+                                    <div class="score-circle 
                                                 {% if user_attempts[quiz.id].total_score >= 80 %}
                                                     bg-success
                                                 {% elif user_attempts[quiz.id].total_score >= 50 %}
                                                     bg-warning
                                                 {% else %}
                                                     bg-danger
-                                                {% endif %}"
-                                                data-bs-toggle="tooltip"
-                                                title="Last attempt score">
-                                                {{ user_attempts[quiz.id].total_score }}
-                                            </div>
-                                        {% else %}
-                                            <span class="badge bg-secondary-subtle text-secondary">Not Attempted</span>
-                                        {% endif %}
-                                    </td>
-                                    <td class="text-end">
-                                        {% if quiz.id in user_attempts %}
-                                            <a href="{{ url_for('user.quiz_results', score_id=user_attempts[quiz.id].id) }}" 
-                                               class="btn btn-sm btn-outline-info me-1" 
-                                               data-bs-toggle="tooltip" 
-                                               title="View Results">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            <a href="{{ url_for('user.quiz_start', quiz_id=quiz.id) }}" 
-                                               class="btn btn-sm btn-outline-primary" 
-                                               data-bs-toggle="tooltip" 
-                                               title="Retake Quiz">
-                                                <i class="fas fa-redo-alt"></i>
-                                            </a>
-                                        {% else %}
-                                            <a href="{{ url_for('user.quiz_start', quiz_id=quiz.id) }}" 
-                                               class="btn btn-sm btn-primary">
-                                                <i class="fas fa-play me-1"></i> Start Quiz
-                                            </a>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+                                                {% endif %}" data-bs-toggle="tooltip" title="Last attempt score">
+                                        {{ user_attempts[quiz.id].total_score }}
+                                    </div>
+                                    {% else %}
+                                    <span class="badge bg-secondary-subtle text-secondary">Not Attempted</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    {% if quiz.id in user_attempts %}
+                                    <a href="{{ url_for('user.quiz_results', score_id=user_attempts[quiz.id].id) }}"
+                                        class="btn btn-sm btn-outline-info me-1" data-bs-toggle="tooltip"
+                                        title="View Results">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    {% else %}
+                                    <a href="{{ url_for('user.quiz_start', quiz_id=quiz.id) }}"
+                                        class="btn btn-sm btn-primary">
+                                        <i class="fas fa-play me-1"></i> Start Quiz
+                                    </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
                 {% else %}
-                    <div class="text-center py-5">
-                        <div class="mb-3">
-                            <i class="fas fa-file-alt fa-3x text-secondary opacity-25"></i>
-                        </div>
-                        <h5 class="text-secondary">No Quizzes Available</h5>
-                        <p class="text-muted mb-0">There are no quizzes available for this subject yet.</p>
-                        <a href="{{ url_for('user.subjects_list') }}" class="btn btn-outline-primary mt-3">
-                            <i class="fas fa-arrow-left me-1"></i> Explore Other Subjects
-                        </a>
+                <div class="text-center py-5">
+                    <div class="mb-3">
+                        <i class="fas fa-file-alt fa-3x text-secondary opacity-25"></i>
                     </div>
+                    <h5 class="text-secondary">No Quizzes Available</h5>
+                    <p class="text-muted mb-0">There are no quizzes available for this subject yet.</p>
+                    <a href="{{ url_for('user.subjects_list') }}" class="btn btn-outline-primary mt-3">
+                        <i class="fas fa-arrow-left me-1"></i> Explore Other Subjects
+                    </a>
+                </div>
                 {% endif %}
             </div>
         </div>
@@ -199,12 +193,13 @@
                                 </div>
                                 <p class="text-muted small mb-3">
                                     {% if chapter.description %}
-                                        {{ chapter.description|truncate(60) }}
+                                    {{ chapter.description|truncate(60) }}
                                     {% else %}
-                                        Quizzes related to {{ chapter.name }}
+                                    Quizzes related to {{ chapter.name }}
                                     {% endif %}
                                 </p>
-                                <button class="btn btn-sm btn-outline-primary chapter-filter-btn" data-chapter="{{ chapter.id }}">
+                                <button class="btn btn-sm btn-outline-primary chapter-filter-btn"
+                                    data-chapter="{{ chapter.id }}">
                                     <i class="fas fa-filter me-1"></i> Filter Quizzes
                                 </button>
                             </div>
@@ -231,7 +226,7 @@
                     <h5>{{ subject.name }}</h5>
                     <p class="text-muted">{{ subject.description }}</p>
                 </div>
-                
+
                 <div class="row g-2 text-center">
                     <div class="col-4">
                         <div class="p-3 bg-light-subtle rounded">
@@ -254,7 +249,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Your Performance -->
         {% if quiz_stats.attempted > 0 %}
         <div class="card shadow-sm">
@@ -266,11 +261,11 @@
                     {% set total_score = 0 %}
                     {% set count = 0 %}
                     {% for quiz_id, attempt in user_attempts.items() %}
-                        {% set total_score = total_score + attempt.total_score %}
-                        {% set count = count + 1 %}
+                    {% set total_score = total_score + attempt.total_score %}
+                    {% set count = count + 1 %}
                     {% endfor %}
                     {% set average_score = (total_score / count)|round(1) if count > 0 else 0 %}
-                    
+
                     <div class="large-score-circle mx-auto
                         {% if average_score >= 80 %}
                             bg-success
@@ -285,15 +280,15 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="mb-3">
                     <div class="d-flex justify-content-between mb-1 small">
                         <span>Performance Statistics</span>
                         <span>{{ quiz_stats.attempted }} out of {{ quiz_stats.total }} quizzes</span>
                     </div>
-                    
+
                 </div>
-                
+
                 <div class="d-grid">
                     <a href="{{ url_for('user.scores') }}" class="btn btn-outline-primary">
                         <i class="fas fa-chart-line me-1"></i> View All Attempts
@@ -380,25 +375,25 @@
         document.querySelectorAll(".chapter-filter-btn").forEach((button) => {
             button.addEventListener("click", function () {
                 const chapterId = this.getAttribute("data-chapter");
-                
+
                 // Set the chapter_id in the form and submit
                 const chapterSelect = document.querySelector("select[name='chapter_id']");
                 if (chapterSelect) {
                     chapterSelect.value = chapterId;
                     chapterSelect.closest("form").submit();
                 }
-                
+
                 // Scroll to quizzes section
                 document.querySelector(".card.shadow-sm")
-                    .scrollIntoView({behavior: "smooth"});
+                    .scrollIntoView({ behavior: "smooth" });
             });
         });
         // Highlight the active link in sidebar
-		const subjectLink = document.querySelector('a[href="{{ url_for("user.subjects_list") }}"]');
-		if (subjectLink) {
-			subjectLink.classList.add("active");
-		}
-	});
+        const subjectLink = document.querySelector('a[href="{{ url_for("user.subjects_list") }}"]');
+        if (subjectLink) {
+            subjectLink.classList.add("active");
+        }
+    });
 
 </script>
 {% endblock %}

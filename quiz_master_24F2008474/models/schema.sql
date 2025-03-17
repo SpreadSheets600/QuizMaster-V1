@@ -1,59 +1,96 @@
--- USERS TABLE: Stores Information About The Users
-CREATE TABLE users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT UNIQUE NOT NULL,
-    password TEXT NOT NULL,
-    full_name TEXT NOT NULL,
-    email TEXT UNIQUE NOT NULL,
-    role TEXT CHECK(role IN ('user', 'admin')) NOT NULL DEFAULT 'user'
-);
+CREATE TABLE
+  users (
+    id integer PRIMARY KEY AUTO_INCREMENT,
+    username varchar(50) UNIQUE NOT NULL,
+    password varchar(100) NOT NULL,
+    full_name varchar(100) NOT NULL,
+    email varchar(100) UNIQUE NOT NULL,
+    role varchar(5) NOT NULL DEFAULT 'user'
+  );
 
--- SUBJECTS TABLE: Stores Information About Different Subjects
-CREATE TABLE subjects (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT UNIQUE NOT NULL,
-    description TEXT
-);
+CREATE TABLE
+  subjects (
+    id integer PRIMARY KEY AUTO_INCREMENT,
+    name varchar(100) UNIQUE NOT NULL,
+    description text
+  );
 
--- CHAPTERS TABLE: Stores Information About The Chapters In Each Subject
-CREATE TABLE chapters (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    subject_id INTEGER NOT NULL,
-    name TEXT NOT NULL,
-    description TEXT,
-    FOREIGN KEY (subject_id) REFERENCES subjects(id) ON DELETE CASCADE
-);
+CREATE TABLE
+  chapters (
+    id integer PRIMARY KEY AUTO_INCREMENT,
+    name varchar(100) NOT NULL,
+    description text,
+    subject_id integer NOT NULL
+  );
 
--- QUIZZES TABLE: Stores Information About The Quizzes Conducted For Each Chapter
-CREATE TABLE quizzes (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    chapter_id INTEGER NOT NULL,
-    date_of_quiz DATE NOT NULL,
-    time_duration TEXT CHECK(length(time_duration) = 5),  -- Format HH:MM
-    remarks TEXT,
-    FOREIGN KEY (chapter_id) REFERENCES chapters(id) ON DELETE CASCADE
-);
+CREATE TABLE
+  quizzes (
+    id integer PRIMARY KEY AUTO_INCREMENT,
+    chapter_id integer NOT NULL,
+    subject_id integer NOT NULL,
+    date_of_quiz date NOT NULL,
+    quiz_name varchar(100) NOT NULL,
+    time_duration varchar(5) NOT NULL COMMENT 'Format HH:MM',
+    remarks text
+  );
 
--- QUESTIONS TABLE: Stores The Questions For Each Quiz
-CREATE TABLE questions (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    quiz_id INTEGER NOT NULL,
-    question_statement TEXT NOT NULL,
-    option1 TEXT NOT NULL,
-    option2 TEXT NOT NULL,
-    option3 TEXT NOT NULL,
-    option4 TEXT NOT NULL,
-    correct_option INTEGER CHECK(correct_option BETWEEN 1 AND 4) NOT NULL,
-    FOREIGN KEY (quiz_id) REFERENCES quizzes(id) ON DELETE CASCADE
-);
+CREATE TABLE
+  questions (
+    id integer PRIMARY KEY AUTO_INCREMENT,
+    quiz_id integer NOT NULL,
+    question_statement text NOT NULL,
+    option1 text NOT NULL,
+    option2 text NOT NULL,
+    option3 text NOT NULL,
+    option4 text NOT NULL,
+    correct_options integer NOT NULL,
+    marks integer NOT NULL DEFAULT 4,
+    negative_marks integer NOT NULL DEFAULT 1,
+    question_image varchar(200),
+    option1_image varchar(200),
+    option2_image varchar(200),
+    option3_image varchar(200),
+    option4_image varchar(200)
+  );
 
--- SCORES TABLE: Stores The Scores Of Each User In Each Quiz
-CREATE TABLE scores (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    quiz_id INTEGER NOT NULL,
-    user_id INTEGER NOT NULL,
-    timestamp_of_attempt DATETIME DEFAULT CURRENT_TIMESTAMP,
-    total_score INTEGER NOT NULL CHECK(total_score >= 0),
-    FOREIGN KEY (quiz_id) REFERENCES quizzes(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
+CREATE TABLE
+  quizzes_attempts (
+    id integer PRIMARY KEY AUTO_INCREMENT,
+    quiz_id integer NOT NULL,
+    user_id integer NOT NULL,
+    question_id integer NOT NULL,
+    start_time datetime DEFAULT (now ()),
+    end_time datetime,
+    answers varchar(500) NOT NULL,
+    attempt_date datetime NOT NULL DEFAULT (now ())
+  );
+
+CREATE TABLE
+  scores (
+    id integer PRIMARY KEY AUTO_INCREMENT,
+    quiz_id integer NOT NULL,
+    user_id integer NOT NULL,
+    timestamp_of_attempt datetime DEFAULT (now ()),
+    total_score integer NOT NULL,
+    correct_answers integer NOT NULL,
+    wrong_answers integer NOT NULL,
+    skipped integer NOT NULL
+  );
+
+ALTER TABLE chapters ADD FOREIGN KEY (subject_id) REFERENCES subjects (id);
+
+ALTER TABLE quizzes ADD FOREIGN KEY (chapter_id) REFERENCES chapters (id);
+
+ALTER TABLE quizzes ADD FOREIGN KEY (subject_id) REFERENCES subjects (id);
+
+ALTER TABLE questions ADD FOREIGN KEY (quiz_id) REFERENCES quizzes (id);
+
+ALTER TABLE quizzes_attempts ADD FOREIGN KEY (quiz_id) REFERENCES quizzes (id);
+
+ALTER TABLE quizzes_attempts ADD FOREIGN KEY (user_id) REFERENCES users (id);
+
+ALTER TABLE quizzes_attempts ADD FOREIGN KEY (question_id) REFERENCES questions (id);
+
+ALTER TABLE scores ADD FOREIGN KEY (quiz_id) REFERENCES quizzes (id);
+
+ALTER TABLE scores ADD FOREIGN KEY (user_id) REFERENCES users (id);

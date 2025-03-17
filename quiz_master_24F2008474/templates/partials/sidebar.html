@@ -13,25 +13,39 @@
 	{% if current_user.is_authenticated and current_user.role == "admin" %}
 
 	<div class="nav flex-column">
-		<a class="nav-link {% if request.endpoint == 'admin.admin_dashboard' %}active{% endif %} text-dark py-2 px-3" href="{{ url_for('admin.admin_dashboard') }}"> <i class="fas fa-tachometer-alt me-2"></i> Dashboard </a>
-		<a class="nav-link {% if 'admin.subject' in request.endpoint %}active{% endif %} text-dark py-2 px-3" href="{{ url_for('admin.subjects_list') }}"> <i class="fas fa-book me-2"></i> Subjects </a>
-		<a class="nav-link {% if 'admin.chapter' in request.endpoint %}active{% endif %} text-dark py-2 px-3" href="{{ url_for('admin.chapters_list') }}"> <i class="fas fa-book me-2"></i> Chpaters </a>
-		<a class="nav-link {% if 'admin.quiz' in request.endpoint %}active{% endif %} text-dark py-2 px-3" href="{{ url_for('admin.quizzes_list') }}"> <i class="fas fa-question-circle me-2"></i> Quizzes </a>
-		<a class="nav-link {% if 'admin.user' in request.endpoint %}active{% endif %} text-dark py-2 px-3" href="{{ url_for('admin.users_list') }}"> <i class="fas fa-users me-2"></i> Users </a>
-		<a class="nav-link {% if request.endpoint == 'admin.statistics' %}active{% endif %} text-dark py-2 px-3" href="{{ url_for('admin.statistics') }}"> <i class="fas fa-chart-bar me-2"></i> Statistics </a>
-		<a class="nav-link {% if request.endpoint == 'admin.api_docs' %}active{% endif %} text-dark py-2 px-3" href="{{ url_for('admin.api_docs') }}"> <i class="fas fa-chart-bar me-2"></i> API </a>
-		<a class="nav-link text-dark py-2 px-3 mt-5" href="{{ url_for('auth.logout') }}"> <i class="fas fa-sign-out-alt me-2"></i> Logout </a>
+		<a class="nav-link {% if request.endpoint == 'admin.admin_dashboard' %}active{% endif %} text-dark py-2 px-3"
+			href="{{ url_for('admin.admin_dashboard') }}"> <i class="fas fa-tachometer-alt me-2"></i> Dashboard </a>
+		<a class="nav-link {% if 'admin.subject' in request.endpoint %}active{% endif %} text-dark py-2 px-3"
+			href="{{ url_for('admin.subjects_list') }}"> <i class="fas fa-book me-2"></i> Subjects </a>
+		<a class="nav-link {% if 'admin.chapter' in request.endpoint %}active{% endif %} text-dark py-2 px-3"
+			href="{{ url_for('admin.chapters_list') }}"> <i class="fas fa-book me-2"></i> Chpaters </a>
+		<a class="nav-link {% if 'admin.quiz' in request.endpoint %}active{% endif %} text-dark py-2 px-3"
+			href="{{ url_for('admin.quizzes_list') }}"> <i class="fas fa-question-circle me-2"></i> Quizzes </a>
+		<a class="nav-link {% if 'admin.user' in request.endpoint %}active{% endif %} text-dark py-2 px-3"
+			href="{{ url_for('admin.users_list') }}"> <i class="fas fa-users me-2"></i> Users </a>
+		<a class="nav-link {% if request.endpoint == 'admin.statistics' %}active{% endif %} text-dark py-2 px-3"
+			href="{{ url_for('admin.statistics') }}"> <i class="fas fa-chart-bar me-2"></i> Statistics </a>
+		<a class="nav-link {% if request.endpoint == 'api.api_docs' %}active{% endif %} text-dark py-2 px-3"
+			href="{{ url_for('api.api_docs') }}"> <i class="fas fa-chart-bar me-2"></i> API </a>
+		<a class="nav-link text-dark py-2 px-3 mt-5" href="{{ url_for('auth.logout') }}"> <i
+				class="fas fa-sign-out-alt me-2"></i> Logout </a>
 	</div>
 
 	{% else %}
 
 	<div class="nav flex-column">
-		<a class="nav-link {% if request.endpoint == 'user.user_dashboard' %}active{% endif %} text-dark py-2 px-3" href="{{ url_for('user.user_dashboard') }}"> <i class="fas fa-tachometer-alt me-2"></i> Dashboard </a>
-		<a class="nav-link {% if 'user.subjects_list' in request.endpoint %}active{% endif %} text-dark py-2 px-3" href="{{ url_for('user.subjects_list') }}"> <i class="fas fa-book me-2"></i> Subjects </a>
-		<a class="nav-link {% if 'user.user_quizzes' in request.endpoint %}active{% endif %} text-dark py-2 px-3" href="{{ url_for('user.user_quizzes') }}"> <i class="fas fa-question-circle me-2"></i> Quizzes </a>
-		<a class="nav-link {% if request.endpoint == 'user.scores' %}active{% endif %} text-dark py-2 px-3" href="{{ url_for('user.scores') }}"> <i class="fas fa-chart-bar me-2"></i> Scores </a>
-		<a class="nav-link {% if request.endpoint == 'user.api_docs' %}active{% endif %} text-dark py-2 px-3" href="{{ url_for('user.api_docs') }}"> <i class="fas fa-chart-bar me-2"></i> API </a>
-		<a class="nav-link text-dark py-2 px-3 mt-5" href="{{ url_for('auth.logout') }}"> <i class="fas fa-sign-out-alt me-2"></i> Logout </a>
+		<a class="nav-link {% if request.endpoint == 'user.user_dashboard' %}active{% endif %} text-dark py-2 px-3"
+			href="{{ url_for('user.user_dashboard') }}"> <i class="fas fa-tachometer-alt me-2"></i> Dashboard </a>
+		<a class="nav-link {% if 'user.subjects_list' in request.endpoint %}active{% endif %} text-dark py-2 px-3"
+			href="{{ url_for('user.subjects_list') }}"> <i class="fas fa-book me-2"></i> Subjects </a>
+		<a class="nav-link {% if 'user.user_quizzes' in request.endpoint %}active{% endif %} text-dark py-2 px-3"
+			href="{{ url_for('user.user_quizzes') }}"> <i class="fas fa-question-circle me-2"></i> Quizzes </a>
+		<a class="nav-link {% if request.endpoint == 'user.scores' %}active{% endif %} text-dark py-2 px-3"
+			href="{{ url_for('user.scores') }}"> <i class="fas fa-chart-bar me-2"></i> Scores </a>
+		<a class="nav-link {% if request.endpoint == 'api.api_docs' %}active{% endif %} text-dark py-2 px-3"
+			href="{{ url_for('api.api_docs') }}"> <i class="fas fa-chart-bar me-2"></i> API </a>
+		<a class="nav-link text-dark py-2 px-3 mt-5" href="{{ url_for('auth.logout') }}"> <i
+				class="fas fa-sign-out-alt me-2"></i> Logout </a>
 	</div>
 
 	{% endif %}

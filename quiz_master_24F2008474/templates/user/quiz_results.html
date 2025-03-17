@@ -6,7 +6,8 @@
 	<div class="ms-auto d-flex gap-2">
 		<form action="{{ url_for('user.search_quizzes') }}" method="GET">
 			<div class="input-group">
-				<input type="text" name="q" class="form-control" placeholder="Search subjects or quizzes..." minlength="3" required />
+				<input type="text" name="q" class="form-control" placeholder="Search subjects or quizzes..."
+					minlength="3" required />
 				<button class="btn btn-primary" type="submit">
 					<i class="fas fa-search"></i>
 				</button>
@@ -16,7 +17,8 @@
 </div>
 
 <!-- Flash Messages -->
-{% with messages = get_flashed_messages(with_categories=true) %} {% if messages %} {% for category, message in messages %}
+{% with messages = get_flashed_messages(with_categories=true) %} {% if messages %} {% for category, message in messages
+%}
 <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show">
 	{{ message }}
 	<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -32,7 +34,8 @@
 			</div>
 			<div class="card-body">
 				<div class="text-center mb-4">
-					<div class="large-score-circle mx-auto {% if summary_stats.total_score >= 80 %} bg-success {% elif summary_stats.total_score >= 50 %} bg-warning {% else %} bg-danger {% endif %}">
+					<div
+						class="large-score-circle mx-auto {% if summary_stats.total_score >= 80 %} bg-success {% elif summary_stats.total_score >= 50 %} bg-warning {% else %} bg-danger {% endif %}">
 						<div class="text-white">
 							<div class="display-4 fw-bold">{{ summary_stats.total_score }}</div>
 							<div>Points</div>
@@ -74,7 +77,8 @@
 				<!-- Performance Chart -->
 				<div class="mt-4">
 					<h6 class="mb-3">Performance Chart</h6>
-					<img src="data:image/png;base64,{{ performance_chart }}" class="img-fluid" alt="Performance Chart" />
+					<img src="data:image/png;base64,{{ performance_chart }}" class="img-fluid"
+						alt="Performance Chart" />
 				</div>
 
 				<!-- Quiz Details -->
@@ -102,8 +106,8 @@
 
 		<!-- Action Buttons -->
 		<div class="d-grid gap-2">
-			<a href="{{ url_for('user.quiz_start', quiz_id=quiz.id) }}" class="btn btn-primary"> <i class="fas fa-redo-alt me-1"></i> Retake Quiz </a>
-			<a href="{{ url_for('user.subject_quizzes', subject_id=quiz.subject_id) }}" class="btn btn-outline-primary"> <i class="fas fa-arrow-left me-1"></i> Back to Subject Quizzes </a>
+			<a href="{{ url_for('user.subject_quizzes', subject_id=quiz.subject_id) }}" class="btn btn-outline-primary">
+				<i class="fas fa-arrow-left me-1"></i> Back to Subject Quizzes </a>
 		</div>
 	</div>
 
@@ -112,17 +116,23 @@
 		<div class="card shadow-sm">
 			<div class="card-header bg-white d-flex justify-content-between align-items-center">
 				<h5 class="mb-0">Questions & Answers</h5>
-				<button class="btn btn-sm btn-outline-primary" id="toggleAllBtn"><i class="fas fa-expand-alt me-1"></i> Expand All</button>
+				<button class="btn btn-sm btn-outline-primary" id="toggleAllBtn"><i class="fas fa-expand-alt me-1"></i>
+					Expand All</button>
 			</div>
 			<div class="card-body p-0">
 				<div class="accordion" id="questionsAccordion">
 					{% for result in question_results %}
 					<div class="accordion-item">
 						<h2 class="accordion-header" id="heading{{ result.question.id }}">
-							<button class="accordion-button collapsed {% if result.is_correct %}question-correct {% elif result.is_skipped %}question-skipped {% else %}question-incorrect{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ result.question.id }}" aria-expanded="false" aria-controls="collapse{{ result.question.id }}">
+							<button
+								class="accordion-button collapsed {% if result.is_correct %}question-correct {% elif result.is_skipped %}question-skipped {% else %}question-incorrect{% endif %}"
+								type="button" data-bs-toggle="collapse"
+								data-bs-target="#collapse{{ result.question.id }}" aria-expanded="false"
+								aria-controls="collapse{{ result.question.id }}">
 								<div class="d-flex align-items-center w-100">
 									<div class="question-number me-3">{{ loop.index }}</div>
-									<div class="fw-normal text-truncate me-2">{{ result.question.question_statement }}</div>
+									<div class="fw-normal text-truncate me-2">{{ result.question.question_statement }}
+									</div>
 									<div class="ms-auto">
 										{% if result.is_correct %}
 										<span class="badge bg-success ms-2">Correct</span>
@@ -135,15 +145,31 @@
 								</div>
 							</button>
 						</h2>
-						<div id="collapse{{ result.question.id }}" class="accordion-collapse collapse" aria-labelledby="heading{{ result.question.id }}" data-bs-parent="#questionsAccordion">
+						<div id="collapse{{ result.question.id }}" class="accordion-collapse collapse"
+							aria-labelledby="heading{{ result.question.id }}" data-bs-parent="#questionsAccordion">
 							<div class="accordion-body">
 								<p class="mb-3 fw-medium">{{ result.question.question_statement }}</p>
 
 								<div class="mb-3 mt-3">
 									{% for option in result.options %}
-									<div class="option-box mt-2 {% if option.index == result.correct_option %} {% elif option.index == result.user_answer and option.index != result.correct_option %}option-incorrect {% elif option.index == result.user_answer %}option-selected{% endif %}">
-										<span class="option-indicator">{{ ['A', 'B', 'C', 'D'][option.index] }}</span>
+									<div class="option-box mt-2 
+										{% if loop.index0 == result.correct_option-1 %}option-correct
+										{% elif loop.index0 == result.user_answer-1 and loop.index0 != result.correct_option-1 %}option-incorrect
+										{% elif loop.index0 == result.user_answer-1 %}option-selected{% endif %}">
+
+										<span class="option-indicator">{{ ['A', 'B', 'C', 'D'][loop.index0] }}</span>
 										{{ option.text }}
+
+										{% if loop.index0 == result.correct_option-1 and loop.index0 !=
+										result.user_answer-1 %}
+										<span class="badge bg-success float-end">Correct Answer</span>
+										{% elif loop.index0 == result.user_answer-1 and loop.index0 !=
+										result.correct_option-1 %}
+										<span class="badge bg-danger float-end">Your Answer</span>
+										{% elif loop.index0 == result.user_answer-1 and loop.index0 ==
+										result.correct_option-1 %}
+										<span class="badge bg-success float-end">Your Correct Answer</span>
+										{% endif %}
 									</div>
 									{% endfor %}
 								</div>

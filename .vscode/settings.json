@@ -1,0 +1,11 @@
+{
+    "sqltools.useNodeRuntime": true,
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "driver": "SQLite",
+            "name": "QuizMater",
+            "database": "${workspaceFolder:QuizMaster-V1}/quiz_master_24F2008474/instance/quiz_master.sqlite3"
+        }
+    ]
+}

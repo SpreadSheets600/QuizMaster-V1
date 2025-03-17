@@ -42,46 +42,6 @@ Quiz Master is a multi-user web application designed for exam preparation across
   
 </details>
 
-### User Table
-- `id` (Primary Key)
-- `username` (Email)
-- `password`
-- `full_name`
-- `qualification`
-- `dob`
-
-### Subject Table
-- `id` (Primary Key)
-- `name`
-- `description`
-
-### Chapter Table
-- `id` (Primary Key)
-- `subject_id` (Foreign Key)
-- `name`
-- `description`
-
-### Quiz Table
-- `id` (Primary Key)
-- `chapter_id` (Foreign Key)
-- `date_of_quiz`
-- `time_duration`
-- `remarks`
-
-### Question Table
-- `id` (Primary Key)
-- `quiz_id` (Foreign Key)
-- `question_statement`
-- `option1`, `option2`, `option3`, `option4`
-- `correct_option`
-
-### Score Table
-- `id` (Primary Key)
-- `quiz_id` (Foreign Key)
-- `user_id` (Foreign Key)
-- `time_stamp_of_attempt`
-- `total_scored`
-
 ## Core Functionalities
 ### Admin Panel
 - CRUD operations for subjects, chapters, quizzes, and questions.
@@ -107,4 +67,37 @@ Quiz Master is a multi-user web application designed for exam preparation across
 - Secure authentication (`flask_login`, `flask_security`).
 - Additional quiz modes or question types.
 
+## How To Run
+
+### Prerequisites
+- Python 3.7 or higher
+- uv (Python package manager)
+
+### Installation Steps
+1. **Clone the repository:**
+  ```
+  git clone https://github.com/SpreadSheets600/QuizMaster-V1.git
+  cd QuizMaster-V1/quiz_master_24F2008474
+  ```
+
+2. **Install dependencies using uv:**
+  ```
+  pip install uv
+  uv sync
+  ```
+
+3. **Run the application:**
+  ```
+  uv run app.py
+  ```
+
+6. **Access the application:**
+  Open your web browser and navigate to `http://localhost:5000`
+
+### Default Admin Credentials
+- **Username:** admin
+- **Password:** admin
+
+### Notes
+- The application uses SQLite by default, no additional database setup required
 

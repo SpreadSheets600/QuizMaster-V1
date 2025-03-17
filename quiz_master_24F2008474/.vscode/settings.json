@@ -1,0 +1,6 @@
+{
+    "prettier.experimentalTernaries": true,
+    "prettier.useTabs": true,
+    "prettier.tabWidth": 4,
+    "prettier.printWidth": 500
+}
